@@ -63,8 +63,8 @@ if (process.env.NODE_ENV === 'development') {
   })
 } else {
   const sslOptions = {
-    key: fs.readFileSync('./ssl/server.key'),
-    cert: fs.readFileSync('./ssl/server.cer'),
+    key: fs.readFileSync('/etc/pki/nginx/private/server.key'),
+    cert: fs.readFileSync('/etc/pki/nginx/server.cer'),
   }
 
   https.createServer(sslOptions, app).listen(process.env.PORT || 3000, () => {
