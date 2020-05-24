@@ -1,3 +1,7 @@
+.vscode/
+*.eslint*
+*.prettierrc.js
+
 # Logs
 logs
 *.log

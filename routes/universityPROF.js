@@ -1,12 +1,10 @@
 const router = require('express').Router()
 const sql = require('mssql')
 const pool = require('../config/config_universityPROF')
-const {
-  logger
-} = require('../lib/logger')
+const { logger } = require('../lib/logger')
 
 router.route('/schedule/teachers/:fio').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -67,7 +65,7 @@ router.route('/schedule/teachers/:fio').get((req, res, next) => {
               }
               subjects.push({
                 name: subject,
-                groups
+                groups,
               })
               if (getSchedule.length - 1 === i) break
               if (
@@ -101,7 +99,7 @@ router.route('/schedule/teachers/:fio').get((req, res, next) => {
 })
 
 router.route('/schedule/groups/:group').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -162,7 +160,7 @@ router.route('/schedule/groups/:group').get((req, res, next) => {
               }
               subjects.push({
                 name: subject,
-                groups
+                groups,
               })
               if (getSchedule.length - 1 === i) break
               if (
@@ -226,7 +224,7 @@ router.route('/schedule/groups/:group').get((req, res, next) => {
 // });
 
 router.route('/teachers').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -258,7 +256,7 @@ router.route('/teachers').get((req, res, next) => {
 })
 
 router.route('/teachers/getById/:id').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -286,7 +284,7 @@ router.route('/teachers/getById/:id').get((req, res, next) => {
 })
 
 router.route('/teachers/getByFio/:fio').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -313,7 +311,7 @@ router.route('/teachers/getByFio/:fio').get((req, res, next) => {
 })
 
 router.route('/teachers/getByBdate/:bdate').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -340,7 +338,7 @@ router.route('/teachers/getByBdate/:bdate').get((req, res, next) => {
 })
 
 router.route('/teachers/getByFio/:fio/:bdate').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -368,7 +366,7 @@ router.route('/teachers/getByFio/:fio/:bdate').get((req, res, next) => {
 })
 
 router.route('/students').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -390,7 +388,7 @@ router.route('/students').get((req, res, next) => {
 })
 
 router.route('/students/getById/:id').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -413,7 +411,7 @@ router.route('/students/getById/:id').get((req, res, next) => {
 })
 
 router.route('/students/getByFio/:fio').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -436,7 +434,7 @@ router.route('/students/getByFio/:fio').get((req, res, next) => {
 })
 
 router.route('/students/getByBdate/:bdate').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -459,7 +457,7 @@ router.route('/students/getByBdate/:bdate').get((req, res, next) => {
 })
 
 router.route('/students/getByFio/:fio/:bdate').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -483,11 +481,11 @@ router.route('/students/getByFio/:fio/:bdate').get((req, res, next) => {
 })
 
 router.route('/students/getByNz/:nz').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
-    request.input('nz', sql.Int, req.params.nz)
+    request.input('nz', sql.NVarChar, req.params.nz)
     request.query(
       `select код_студента, наименование, дата_рождения, номер_зачетной_книжки from с_студенты_new_1 where номер_зачетной_книжки = @nz`,
       (err, result) => {
@@ -506,7 +504,7 @@ router.route('/students/getByNz/:nz').get((req, res, next) => {
 })
 
 router.route('/groups').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
@@ -577,7 +575,7 @@ router.route('/groups').get((req, res, next) => {
 })
 
 router.route('/IdFromOneC/:fio').get((req, res, next) => {
-  pool.connect(err => {
+  pool.connect((err) => {
     if (err) res.sendStatus(400)
 
     const request = new sql.Request(pool)
