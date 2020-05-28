@@ -1,6 +1,6 @@
 .vscode/
-*.eslint*
-*.prettierrc.js
+.eslintrc.js
+.prettierrc.js
 
 # Logs
 logs
