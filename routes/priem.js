@@ -243,38 +243,133 @@ router.route('/newSpecialities/people/:code').get((req, res, next) => {
   })
 })
 
-router.route('/people').get((req, res, next) => {
+router.route('/applicants').get((req, res, next) => {
+  const {
+    year,
+    doc_type,
+    enroll_accepted,
+    admission_type,
+    spec,
+    sponsorship_type,
+    concurrency_type,
+  } = req.body
   pool.connect((err) => {
-    if (err) res.sendStatus(400)
+    if (err) {
+      console.log(err)
+      res.sendStatus(400)
+    }
 
     const request = new sql.Request(pool)
     request.query(
-      `select
-          docs.Код code1C
-          ,docs.Наименование fio
-          ,(0 + isnull(docs.[Английский язык], 0) + isnull(docs.[Биология], 0) + isnull(docs.[География], 0) + isnull(docs.[Информатика и ИКТ], 0) + isnull(docs.[История], 0) + isnull(docs.[Литература], 0) + isnull(docs.[Математика], 0) + isnull(docs.[Обществознание], 0)+ isnull(docs.[Русский язык], 0) + isnull(docs.[Физика], 0) + isnull(docs.[Химия], 0)) ege_all
-          ,cast(isnull(docs.[Русский язык], 0) as int) ege_rus, cast(isnull(docs.[Математика], 0) as int) ege_mat,cast(isnull(docs.[Информатика и ИКТ], 0) as int) ege_inf,cast(isnull(docs.[Физика], 0) as int) ege_fiz,cast(isnull(docs.[Обществознание], 0) as int) ege_obs,cast(isnull(docs.[История], 0) as int) ege_ist,cast(isnull(docs.[Английский язык], 0) as int) ege_ang,cast(isnull(docs.[Литература], 0) as int) ege_lit,cast(isnull(docs.[Биология], 0) as int) ege_bio,cast(isnull(docs.[Химия], 0) as int) ege_him,cast(isnull(docs.[География], 0) as int) ege_geo
-          ,cast(isnull(docs.[БаллИндивидуальноеДостижение], 0) as int) indiv
-          ,docs.ВидДокумента doctype
-          ,iif(docs.ПоданоСогласиеНаЗачисление = 'Подано', 1, 0) agrees_enroll
-          ,iif(docs.КатегорияПриема = 'На общих основаниях', 1, 0) has_privelege
-          ,iif(year(docs.ДатаЗаявления) > year(getdate()), dateadd(year, -2000, docs.ДатаЗаявления), docs.ДатаЗаявления)  date_applied
-          ,docs.Специальность spec
-          ,docs.ОснованиеПоступления osnovanie
-          ,docs.КонкурснаяГруппа concurrent_group
-          ,docs.КатегорияПриема priem_category
-      from (
-          select  priem.Код, priem.Наименование, priem.Специальность, priem.КонкурснаяГруппа, priem.ВидДокумента, priem.ДатаЗаявления, priem.КатегорияПриема, priem.ОснованиеПоступления, priem.НуждаемостьВОбщежитии, priem.УровеньПодготовки, priem.Предмет, priem.БаллЕГЭ, priem.БаллИндивидуальноеДостижение, priem.КодСпециальности, priem.СостояниеАбитуриента, priem.ПоданоСогласиеНаЗачисление
-          from Vestra_прием_ПоданныеДокументы_2019 priem
-      ) d
-      pivot
-      (
-          max(d.БаллЕГЭ)
-          for d.Предмет in ([Английский язык],[БИОГЕОГРАФИЯ],[Биология],[География],[Информатика],[Информатика и ИКТ],[История],[Литература],[Математика],[Математическая логика и теория алгоритмов],[Обществознание],[Русский язык],[Физика],[Химия])
-      ) docs
-    `,
+      `select top(100)
+      docs.code1C
+     ,docs.surname
+     ,docs.name
+     ,docs.patronymic
+     ,docs.extra_score
+     ,docs.doc_type
+     ,docs.enroll_accepted
+     ,docs.priveleged
+     ,docs.dorm_required
+     ,docs.date_applied
+     ,docs.spec
+     ,docs.sponsorship_type
+--      ,docs.status
+     ,(0 + isnull(docs.[Английский язык], 0) + isnull(docs.Биология, 0) + isnull(docs.География, 0) + isnull(docs.[Информатика и ИКТ], 0) + isnull(docs.История, 0) + isnull(docs.Литература, 0) + isnull(docs.Математика, 0) + isnull(docs.Обществознание, 0)+ isnull(docs.[Русский язык], 0) + isnull(docs.Физика, 0) + isnull(docs.Химия, 0)) ege_all
+     ,cast(isnull(docs.[Русский язык], 0) as int) ege_rus, cast(isnull(docs.Математика, 0) as int) ege_mat,cast(isnull(docs.[Информатика и ИКТ], 0) as int) ege_inf,cast(isnull(docs.Физика, 0) as int) ege_fiz,cast(isnull(docs.Обществознание, 0) as int) ege_obs,cast(isnull(docs.История, 0) as int) ege_ist,cast(isnull(docs.[Английский язык], 0) as int) ege_ang,cast(isnull(docs.Литература, 0) as int) ege_lit,cast(isnull(docs.Биология, 0) as int) ege_bio,cast(isnull(docs.Химия, 0) as int) ege_him,cast(isnull(docs.География, 0) as int) ege_geo
+       from (SELECT
+    fiz.Код code1C
+    ,fiz.Фамилия surname
+    ,fiz.Имя name
+    ,fiz.Отчество patronymic
+    ,isnull(ot_dost.Наименование, 0) extra_score
+    ,iif(np.ВидДокумента_Ссылка = 0x8BAD2D90F32DA6BF4DE0752D2C86A672, 'Копия', 'Оригинал') doc_type
+    ,perecSoglName.EnumValue enroll_accepted
+    ,iif(kp.Наименование = 'Имеющие особое право', 1, 0) priveleged
+    ,iif(zaya.НеобходимостьВОбщежитии = 0x00, 'Нет', 'Да') dorm_required
+    ,iif(year(zaya.Дата) > year(getdate()), dateadd(year, -2000, zaya.Дата), zaya.Дата) date_applied
+    ,spec.Наименование spec
+    ,op.Наименование sponsorship_type
+    ,kon.Наименование concurrency_type
+    ,kp.Наименование admission_type
+    ,urov.Наименование degree_type
+    ,dis.Наименование Предмет
+    ,ot.Наименование БаллЕГЭ
+--     ,perecSostName.EnumValue status
+FROM Справочник_ФизическиеЛица fiz
+         LEFT JOIN РегистрСведений_СостояниеЗаявленийПоступающих sostZaya on fiz.Ссылка = sostZaya.ФизическоеЛицо_Ссылка
+         LEFT JOIN Справочник_КонкурсныеГруппы kon on sostZaya.КонкурснаяГруппа_Ссылка = kon.Ссылка
+         LEFT JOIN Справочник_УровеньПодготовки urov on kon.УровеньПодготовки_Ссылка = urov.Ссылка
+         LEFT JOIN Документ_СвидетельствоЕГЭ ege on ege.ФизическоеЛицо_Ссылка = fiz.Ссылка
+         LEFT JOIN Документ_СвидетельствоЕГЭ_РезультатыЕГЭ res on res.Ссылка = ege.Ссылка
+         inner JOIN Справочник_Дисциплины dis on res.Предмет_Ссылка = dis.Ссылка
+         LEFT JOIN Справочник_Отметки ot on res.Балл_Ссылка = ot.Ссылка
+         LEFT JOIN Документ_УчетДостиженийАбитуриентов dost on dost.ФизическоеЛицо_Ссылка = fiz.Ссылка
+         LEFT JOIN Документ_УчетДостиженийАбитуриентов_Достижения res_dost on dost.Ссылка = res_dost.Ссылка
+         LEFT JOIN Справочник_Отметки ot_dost on res_dost.Балл_Ссылка = ot_dost.Ссылка
+         LEFT JOIN Справочник_Специальности spec on spec.Ссылка = kon.Специальность_Ссылка
+         LEFT JOIN Перечисление_СостоянияЗаявленийПоступающих perecSost on perecSost.Ссылка = sostZaya.Состояние_Ссылка
+         LEFT JOIN п_СостоянияЗаявленийПоступающих perecSostName on perecSostName.EnumOrder = perecSost.Порядок
+         left JOIN РегистрСведений_СогласияНаЗачисление sogl on sogl.ФизическоеЛицо_Ссылка = fiz.Ссылка
+         left JOIN Перечисление_СостоянияСогласийНаЗачисление perecSogl on perecSogl.Ссылка = sogl.Состояние_Ссылка
+         inner JOIN п_СостоянияСогласийНаЗачисление perecSoglName on perecSoglName.EnumOrder = perecSogl.Порядок
+inner join
+    (select ФизическоеЛицо_Ссылка
+                , max(Дата) Дата
+                , max(НеобходимостьВОбщежитии) НеобходимостьВОбщежитии
+                , max(Ссылка) Ссылка
+            from Документ_ЗаявлениеПоступающего
+            group by ФизическоеЛицо_Ссылка)
+    zaya on zaya.ФизическоеЛицо_Ссылка = fiz.Ссылка
+inner join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка
+inner join dbo.Справочник_ОснованияПоступления op on np.ОснованиеПоступления_Ссылка = op.Ссылка
+inner join dbo.Справочник_КатегорииПриема kp on np.КатегорияПриема_Ссылка = kp.Ссылка
+where urov.Наименование in ('Бакалавр')
+group by fiz.Код
+       , fiz.Фамилия
+       , fiz.Имя
+       , fiz.Отчество
+       , spec.Наименование
+       , op.Наименование
+       , kon.Наименование
+       , kp.Наименование
+       , urov.Наименование
+       , isnull(ot_dost.Наименование, 0)
+       , perecSoglName.EnumValue
+       , iif(kp.Наименование = 'Имеющие особое право', 1, 0)
+       , iif(zaya.НеобходимостьВОбщежитии = 0x00, 'Нет', 'Да')
+       , zaya.Дата
+       , ot.Наименование
+       , dis.Наименование
+       , iif(np.ВидДокумента_Ссылка = 0x8BAD2D90F32DA6BF4DE0752D2C86A672, 'Копия', 'Оригинал')
+--        , perecSostName.EnumValue
+           ) d
+    pivot
+                  (
+                  max(d.БаллЕГЭ)
+                  for d.Предмет in ([Английский язык],БИОГЕОГРАФИЯ,Биология,География,Информатика,[Информатика и ИКТ],История,Литература,Математика,[Математическая логика и теория алгоритмов],Обществознание,[Русский язык],Физика,Химия)
+                  ) docs
+where
+      year(docs.date_applied) = ${!year ? '2019' : year}
+      and docs.spec = ${!spec ? 'docs.spec' : spec}
+      and docs.sponsorship_type = ${
+        !sponsorship_type ? 'docs.sponsorship_type' : sponsorship_type
+      }
+      and docs.concurrency_type = ${
+        !concurrency_type ? 'docs.concurrency_type' : concurrency_type
+      }
+      and docs.admission_type = ${
+        !admission_type ? 'docs.admission_type' : admission_type
+      }
+      and docs.doc_type =  ${!doc_type ? 'docs.doc_type' : doc_type}
+      and docs.enroll_accepted = ${
+        !enroll_accepted ? 'docs.enroll_accepted' : enroll_accepted
+      }
+order by docs.spec, ege_all
+  `,
       (err, result) => {
         if (err) {
+          console.log(err)
           loggerPriem.log('error', 'Get people error', {
             err,
           })
@@ -288,7 +383,51 @@ router.route('/people').get((req, res, next) => {
   })
 })
 
-module.exports = router
+router.route('/doctypes').get((req, res, next) => {
+  res.send(['Копия', 'Оригинал'])
+})
+
+router.route('/enroll_types').get((req, res, next) => {
+  res.send(['Подано', 'Отозвано'])
+})
+
+router.route('/concurrency_categories').get((req, res, next) => {
+  pool.connect((err) => {
+    if (err) res.sendStatus(400)
+
+    const request = new sql.Request(pool)
+    request.query(
+      `select distinct Наименование from Справочник_КонкурсныеГруппы`,
+      (err, result) => {
+        if (err) {
+          loggerPriem.log('error', 'Get concurrency_types error', {
+            err,
+          })
+          res.sendStatus(400)
+        }
+
+        pool.close()
+        const tmp = []
+        for (e of result.recordset) {
+          tmp.push(e['Наименование'])
+        }
+        res.send(tmp)
+      },
+    )
+  })
+})
+
+router.route('/sponsorship_types').get((req, res, next) => {
+  res.send(['Бюджетная основа', 'Полное возмещение затрат', 'Целевой прием'])
+})
+
+router.route('/admission_types').get((req, res, next) => {
+  res.send([
+    'Без вступительных испытаний',
+    'Имеющие особое право',
+    'На общих основаниях',
+  ])
+})
 
 function getCurrentDate() {
   let currentTime = new Date()
@@ -318,7 +457,7 @@ function getYearForCurrentSpecialities() {
   return currentDate.year
 }
 
-router.route('/applicants').get((req, res, next) => {
+router.route('/applicants_obsolete').get((req, res, next) => {
   if (!admissionCommitteeInProcess())
     res.send('AdmissionCommitteeHasNotStarted')
   let year = getCurrentDate().year
@@ -425,3 +564,5 @@ router.route('/applicants/info/:id').get((req, res, next) => {
     )
   })
 })
+
+module.exports = router
