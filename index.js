@@ -59,7 +59,7 @@ if (!isProduction) {
   })
 }
 
-// .к. nginx сам по себе пропускает только https,
+// Т.к. nginx сам по себе пропускает только https,
 // десь необязательно его включать, поэтому
 // rocess.env.NODE_ENV === 'development' изменено на true
 

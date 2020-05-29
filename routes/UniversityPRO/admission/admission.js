@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const sql = require('mssql')
-const pool = require('../config/config_universityPROF')
-const { loggerPriem } = require('../lib/logger')
+const pool = require('../../../config/config_universityPROF')
+const { logger } = require('../../../lib/logger')
 
 const getSpecialityInfo = (req, res, year) => {
   pool.connect((err) => {
@@ -324,7 +324,7 @@ inner join
 inner join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка
 inner join dbo.Справочник_ОснованияПоступления op on np.ОснованиеПоступления_Ссылка = op.Ссылка
 inner join dbo.Справочник_КатегорииПриема kp on np.КатегорияПриема_Ссылка = kp.Ссылка
-where urov.Наименование in ('Бакалавр')
+where urov.Наименование in ('Бакалавр','Специалист','Академический бакалавр','Прикладной бакалавр')
 group by fiz.Код
        , fiz.Фамилия
        , fiz.Имя

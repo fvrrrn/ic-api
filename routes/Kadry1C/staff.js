@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const sql = require('mssql')
-const pool = require('../config/config_Kadry1C')
-const { logger } = require('../lib/logger')
+const pool = require('../../config/config_Kadry1C')
+const { logger } = require('../../lib/logger')
 
 router.route('/getStaffByFio/:fio').get((req, res, next) => {
   pool.connect((err) => {

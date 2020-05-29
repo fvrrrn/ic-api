@@ -1,6 +1,3 @@
-/**
- * link to the APIs
- */
 const router = require('express').Router()
 const morgan = require('morgan')
 const fs = require('fs')
@@ -35,8 +32,9 @@ router.use(
   ),
 )
 
-router.use('/empl', require('./Kadry1C'))
-router.use('/uni', require('./universityPROF'))
-router.use('/priem', require('./priem'))
+router.use('/staff', require('./Kadry1C/staff'))
+router.use('/edu/info', require('./UniversityPRO/education/info'))
+router.use('/edu/schedule', require('./UniversityPRO/education/schedule'))
+router.use('/admission', require('./UniversityPRO/admission/admission'))
 
 module.exports = router
