@@ -425,7 +425,18 @@ router.route('/concurrency_types').get((req, res, next) => {
 
         const request = new sql.Request(pool)
         request.query(
-            `select distinct Код id, Наименование name from Справочник_КонкурсныеГруппы`,
+            `
+SELECT
+        kon.Код id
+        ,kon.Наименование name
+        ,disc.Наименование subject
+FROM Справочник_КонкурсныеГруппы kon
+         INNER JOIN Справочник_КонкурсныеГруппы_ВступительныеИспытания as konIsp on kon.Ссылка = konIsp.Ссылка
+         INNER JOIN Справочник_НаборыВступительныхИспытаний as isp on isp.Ссылка = konIsp.НаборВступительныхИспытаний_Ссылка
+         INNER JOIN Справочник_НаборыВступительныхИспытаний_Предметы as ispPredmet on ispPredmet.Ссылка = isp.Ссылка
+         INNER JOIN Справочник_Дисциплины as disc on disc.Ссылка = ispPredmet.Предмет_Ссылка
+group by kon.Код, kon.Наименование, disc.Наименование
+order by kon.Код`,
             (err, result) => {
                 if (err) {
                     loggerPriem.log('error', 'Get concurrency_types error', {
@@ -435,7 +446,22 @@ router.route('/concurrency_types').get((req, res, next) => {
                 }
 
                 pool.close()
-                res.send(result.recordset)
+
+                const output = []
+                result.recordset.reduce((acc, cur) => {
+                    if (acc.id !== cur.id ) {
+                        output.push(acc)
+                        return {
+                            id: cur.id,
+                            name: cur.name,
+                            subjects: [cur.subject],
+                        }
+                    }
+                    acc.subjects.push(cur.subject)
+                    return acc
+                }, {})
+                output.shift()
+                res.send(output)
             },
         )
     })
