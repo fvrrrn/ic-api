@@ -279,64 +279,58 @@ router.route('/applicants').get((req, res, next) => {
 
         const request = new sql.Request(pool)
         request.query(
-            `select * from (SELECT top(50)
-    fiz.Код code1C
-     ,fiz.Фамилия surname
-     ,fiz.Имя name
-     ,fiz.Отчество patronymic
-     ,isnull(ot_dost.Наименование, 0) extra_score
-     ,iif(np.ВидДокумента_Ссылка = 0x8BAD2D90F32DA6BF4DE0752D2C86A672, 0, 1) is_doc_original
-     ,iif(perecSoglName.EnumValue = 'Подано', 1, 0) enroll_accepted
-     ,iif(kp.Наименование = 'Имеющие особое право', 1, 0) privileged
-     ,iif(zaya.НеобходимостьВОбщежитии = 0x00, 0, 1) dorm_required
-     ,iif(year(zaya.Дата) > year(getdate()), dateadd(year, -2000, zaya.Дата), zaya.Дата) date_applied
-     ,spec.Наименование spec
-     ,spec.код spec_id
-     ,op.Наименование sponsorship_type
-     ,op.код sponsorship_type_id
-     ,kon.Наименование concurrency_type
-     ,kon.код concurrency_type_id
-     ,kp.Наименование admission_type
-     ,kp.код admission_type_id
-     ,urov.Наименование degree_type
-     ,urov.код degree_type_id
-     ,dis.Наименование ege_subject
-     ,dis.код ege_subject_id
-     ,ot.Наименование ege_score
-    ,perecSostName.EnumValue status
-    ,perecSostName.enumorder status_id
-FROM Справочник_ФизическиеЛица fiz
-         LEFT JOIN РегистрСведений_СостояниеЗаявленийПоступающих sostZaya on fiz.Ссылка = sostZaya.ФизическоеЛицо_Ссылка
-         LEFT JOIN Справочник_КонкурсныеГруппы kon on sostZaya.КонкурснаяГруппа_Ссылка = kon.Ссылка
-         LEFT JOIN Справочник_УровеньПодготовки urov on kon.УровеньПодготовки_Ссылка = urov.Ссылка
-         LEFT JOIN Документ_СвидетельствоЕГЭ ege on ege.ФизическоеЛицо_Ссылка = fiz.Ссылка
-         LEFT JOIN Документ_СвидетельствоЕГЭ_РезультатыЕГЭ res on res.Ссылка = ege.Ссылка
-         inner JOIN Справочник_Дисциплины dis on res.Предмет_Ссылка = dis.Ссылка
-         LEFT JOIN Справочник_Отметки ot on res.Балл_Ссылка = ot.Ссылка
-         LEFT JOIN Документ_УчетДостиженийАбитуриентов dost on dost.ФизическоеЛицо_Ссылка = fiz.Ссылка
-         LEFT JOIN Документ_УчетДостиженийАбитуриентов_Достижения res_dost on dost.Ссылка = res_dost.Ссылка
-         LEFT JOIN Справочник_Отметки ot_dost on res_dost.Балл_Ссылка = ot_dost.Ссылка
-         LEFT JOIN Справочник_Специальности spec on spec.Ссылка = kon.Специальность_Ссылка
-         LEFT JOIN Перечисление_СостоянияЗаявленийПоступающих perecSost on perecSost.Ссылка = sostZaya.Состояние_Ссылка
-         LEFT JOIN п_СостоянияЗаявленийПоступающих perecSostName on perecSostName.EnumOrder = perecSost.Порядок
-         left JOIN РегистрСведений_СогласияНаЗачисление sogl on sogl.ФизическоеЛицо_Ссылка = fiz.Ссылка
-         left JOIN Перечисление_СостоянияСогласийНаЗачисление perecSogl on perecSogl.Ссылка = sogl.Состояние_Ссылка
-         inner JOIN п_СостоянияСогласийНаЗачисление perecSoglName on perecSoglName.EnumOrder = perecSogl.Порядок
-         inner join
-     (select ФизическоеЛицо_Ссылка
-           , max(Дата) Дата
-           , max(НеобходимостьВОбщежитии) НеобходимостьВОбщежитии
-           , max(Ссылка) Ссылка
-      from Документ_ЗаявлениеПоступающего
-      group by ФизическоеЛицо_Ссылка)
-                       zaya on zaya.ФизическоеЛицо_Ссылка = fiz.Ссылка
-         inner join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка
-         inner join dbo.Справочник_ОснованияПоступления op on np.ОснованиеПоступления_Ссылка = op.Ссылка
-         inner join dbo.Справочник_КатегорииПриема kp on np.КатегорияПриема_Ссылка = kp.Ссылка
-where urov.Наименование in ('Бакалавр','Специалист','Академический бакалавр','Прикладной бакалавр')) docs
+            `
+            select * from (SELECT top(5000)
+                   fiz.Код code1C
+                       ,fiz.Фамилия surname
+                       ,fiz.Имя name
+                       ,fiz.Отчество patronymic
+                       ,isnull(ot_dost.Наименование, 0) extra_score
+                       ,iif(np.ВидДокумента_Ссылка = 0x8BAD2D90F32DA6BF4DE0752D2C86A672, 0, 1) is_doc_original
+                       ,iif(perecSoglName.EnumValue = 'Подано', 1, 0) enroll_accepted
+                       ,iif(kp.Наименование = 'Имеющие особое право', 1, 0) privileged
+                       ,iif(zaya.НеобходимостьВОбщежитии = 0x00, 0, 1) dorm_required
+                       ,iif(year(zaya.Дата) > year(getdate()), dateadd(year, -2000, zaya.Дата), zaya.Дата) date_applied
+                       ,spec.Наименование spec
+                       ,spec.код spec_id
+                       ,op.Наименование sponsorship_type
+                       ,op.код sponsorship_type_id
+                       ,kon.Наименование concurrency_type
+                       ,kon.код concurrency_type_id
+                       ,kp.Наименование admission_type
+                       ,kp.код admission_type_id
+                       ,urov.Наименование degree_type
+                       ,urov.код degree_type_id
+                       ,dis.Наименование ege_subject
+                       ,dis.код ege_subject_id
+                       ,ot.Наименование ege_score
+                       ,perecSostName.EnumValue status
+                       ,perecSostName.enumorder status_id
+               FROM Справочник_ФизическиеЛица fiz
+                        LEFT JOIN РегистрСведений_СостояниеЗаявленийПоступающих sostZaya on fiz.Ссылка = sostZaya.ФизическоеЛицо_Ссылка
+                        inner JOIN Справочник_КонкурсныеГруппы kon on sostZaya.КонкурснаяГруппа_Ссылка = kon.Ссылка and kon.ПриемнаяКампания_Ссылка = 0x81246C626D51EA7011E9E5E0CDC97253
+                        LEFT JOIN Справочник_УровеньПодготовки urov on kon.УровеньПодготовки_Ссылка = urov.Ссылка
+                        LEFT JOIN Документ_СвидетельствоЕГЭ ege on ege.ФизическоеЛицо_Ссылка = fiz.Ссылка
+                        LEFT JOIN Документ_СвидетельствоЕГЭ_РезультатыЕГЭ res on res.Ссылка = ege.Ссылка
+                        inner JOIN Справочник_Дисциплины dis on res.Предмет_Ссылка = dis.Ссылка
+                        LEFT JOIN Справочник_Отметки ot on res.Балл_Ссылка = ot.Ссылка
+                        LEFT JOIN Документ_УчетДостиженийАбитуриентов dost on dost.ФизическоеЛицо_Ссылка = fiz.Ссылка
+                        LEFT JOIN Документ_УчетДостиженийАбитуриентов_Достижения res_dost on dost.Ссылка = res_dost.Ссылка
+                        LEFT JOIN Справочник_Отметки ot_dost on res_dost.Балл_Ссылка = ot_dost.Ссылка
+                        LEFT JOIN Справочник_Специальности spec on spec.Ссылка = kon.Специальность_Ссылка
+                        LEFT JOIN Перечисление_СостоянияЗаявленийПоступающих perecSost on perecSost.Ссылка = sostZaya.Состояние_Ссылка
+                        LEFT JOIN п_СостоянияЗаявленийПоступающих perecSostName on perecSostName.EnumOrder = perecSost.Порядок
+                        left JOIN РегистрСведений_СогласияНаЗачисление sogl on sogl.ФизическоеЛицо_Ссылка = fiz.Ссылка
+                        left JOIN Перечисление_СостоянияСогласийНаЗачисление perecSogl on perecSogl.Ссылка = sogl.Состояние_Ссылка
+                        inner JOIN п_СостоянияСогласийНаЗачисление perecSoglName on perecSoglName.EnumOrder = perecSogl.Порядок
+                        inner join
+     Документ_ЗаявлениеПоступающего
+                        zaya on zaya.ФизическоеЛицо_Ссылка = fiz.Ссылка
+                        inner join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка
+                        inner join dbo.Справочник_ОснованияПоступления op on np.ОснованиеПоступления_Ссылка = op.Ссылка
+                        inner join dbo.Справочник_КатегорииПриема kp on np.КатегорияПриема_Ссылка = kp.Ссылка) docs
 where
-      year(docs.date_applied) = ${year}
-      AND docs.code1C = ${code1C}
+      docs.code1C = ${code1C}
   AND docs.admission_type_id = ${admission_type_id}
   AND docs.concurrency_type_id = ${concurrency_type_id}
   AND docs.sponsorship_type_id = ${sponsorship_type_id}
@@ -360,6 +354,7 @@ AND docs.is_doc_original = ${is_doc_original}
 
                 pool.close()
                 const output = []
+                let last = null
                 result.recordset.reduce((acc, cur) => {
                     if (acc.code1C !== cur.code1C ) {
                         output.push(acc)
@@ -408,9 +403,11 @@ AND docs.is_doc_original = ${is_doc_original}
                             }
                         })
                     }
+                    last = acc
                     return acc
                 }, {})
                 output.shift()
+                output.push(last)
                 res.send(output)
             },
         )
@@ -435,6 +432,7 @@ FROM Справочник_КонкурсныеГруппы kon
          INNER JOIN Справочник_НаборыВступительныхИспытаний as isp on isp.Ссылка = konIsp.НаборВступительныхИспытаний_Ссылка
          INNER JOIN Справочник_НаборыВступительныхИспытаний_Предметы as ispPredmet on ispPredmet.Ссылка = isp.Ссылка
          INNER JOIN Справочник_Дисциплины as disc on disc.Ссылка = ispPredmet.Предмет_Ссылка
+where kon.ПриемнаяКампания_Ссылка = 0x81246C626D51EA7011E9E5E0CDC97253
 group by kon.Код, kon.Наименование, disc.Наименование
 order by kon.Код`,
             (err, result) => {
