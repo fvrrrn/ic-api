@@ -312,7 +312,7 @@ router.route('/applicants').get((req, res, next) => {
                         LEFT JOIN Справочник_УровеньПодготовки urov on kon.УровеньПодготовки_Ссылка = urov.Ссылка
                         LEFT JOIN Документ_СвидетельствоЕГЭ ege on ege.ФизическоеЛицо_Ссылка = fiz.Ссылка
                         LEFT JOIN Документ_СвидетельствоЕГЭ_РезультатыЕГЭ res on res.Ссылка = ege.Ссылка
-                        inner JOIN Справочник_Дисциплины dis on res.Предмет_Ссылка = dis.Ссылка
+                        left JOIN Справочник_Дисциплины dis on res.Предмет_Ссылка = dis.Ссылка
                         LEFT JOIN Справочник_Отметки ot on res.Балл_Ссылка = ot.Ссылка
                         LEFT JOIN Документ_УчетДостиженийАбитуриентов dost on dost.ФизическоеЛицо_Ссылка = fiz.Ссылка
                         LEFT JOIN Документ_УчетДостиженийАбитуриентов_Достижения res_dost on dost.Ссылка = res_dost.Ссылка
@@ -322,13 +322,13 @@ router.route('/applicants').get((req, res, next) => {
                         LEFT JOIN п_СостоянияЗаявленийПоступающих perecSostName on perecSostName.EnumOrder = perecSost.Порядок
                         left JOIN РегистрСведений_СогласияНаЗачисление sogl on sogl.ФизическоеЛицо_Ссылка = fiz.Ссылка
                         left JOIN Перечисление_СостоянияСогласийНаЗачисление perecSogl on perecSogl.Ссылка = sogl.Состояние_Ссылка
-                        inner JOIN п_СостоянияСогласийНаЗачисление perecSoglName on perecSoglName.EnumOrder = perecSogl.Порядок
-                        inner join
-     Документ_ЗаявлениеПоступающего
+                        left JOIN п_СостоянияСогласийНаЗачисление perecSoglName on perecSoglName.EnumOrder = perecSogl.Порядок
+                        left join
+                    Документ_ЗаявлениеПоступающего
                         zaya on zaya.ФизическоеЛицо_Ссылка = fiz.Ссылка
-                        inner join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка
-                        inner join dbo.Справочник_ОснованияПоступления op on np.ОснованиеПоступления_Ссылка = op.Ссылка
-                        inner join dbo.Справочник_КатегорииПриема kp on np.КатегорияПриема_Ссылка = kp.Ссылка) docs
+                        left join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка
+                        left join dbo.Справочник_ОснованияПоступления op on np.ОснованиеПоступления_Ссылка = op.Ссылка
+                        left join dbo.Справочник_КатегорииПриема kp on np.КатегорияПриема_Ссылка = kp.Ссылка) docs
 where
       docs.code1C = ${code1C}
   AND docs.admission_type_id = ${admission_type_id}
@@ -342,6 +342,7 @@ AND docs.is_doc_original = ${is_doc_original}
   AND docs.dorm_required = ${dorm_required}
   AND docs.enroll_accepted = ${enroll_accepted}
   AND docs.privileged = ${privileged}
+  order by docs.code1C
   `,
             (err, result) => {
                 if (err) {
