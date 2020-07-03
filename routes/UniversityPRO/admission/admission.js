@@ -245,7 +245,6 @@ router.route('/newSpecialities/people/:code').get((req, res, next) => {
 
 router.route('/applicants').get((req, res, next) => {
     let {
-        year = '2019',
         code1C = 'docs.code1C',
         is_doc_original = 'docs.is_doc_original',
         enroll_accepted = 'docs.enroll_accepted',
@@ -253,7 +252,7 @@ router.route('/applicants').get((req, res, next) => {
         privileged = 'docs.privileged',
         spec_id = 'docs.spec_id',
         status_id = 'docs.status_id',
-        ege_subject_id = 'docs.ege_subject_id',
+        subject_id = 'docs.ege_subject_id',
         degree_type_id = 'docs.degree_type_id',
         admission_type_id = 'docs.admission_type_id',
         concurrency_type_id = 'docs.concurrency_type_id',
@@ -335,7 +334,7 @@ where
   AND docs.concurrency_type_id = ${concurrency_type_id}
   AND docs.sponsorship_type_id = ${sponsorship_type_id}
   AND docs.degree_type_id = ${degree_type_id}
-  AND docs.ege_subject_id = ${ege_subject_id}
+  AND docs.ege_subject_id = ${subject_id}
   AND docs.spec_id = ${spec_id}
   AND docs.status_id = ${status_id}
 AND docs.is_doc_original = ${is_doc_original}
@@ -370,16 +369,29 @@ AND docs.is_doc_original = ${is_doc_original}
                             privileged: !!cur.privileged,
                             dorm_required: !!cur.dorm_required,
                             date_applied: cur.date_applied,
-                            sponsorship_type: {id: cur.sponsorship_type_id, name: cur.sponsorship_type},
-                            admission_type: {id: cur.admission_type_id, name: cur.admission_type},
-                            degree_type: {id: cur.degree_type_id, name: cur.degree_type},
-                            ege: [{id: cur.ege_subject_id, name: cur.ege_subject, score: +cur.ege_score}],
+                            exams: {
+                                ege: [{id: cur.ege_subject_id, name: cur.ege_subject, score: +cur.ege_score}],
+                                vi: []
+                            },
                             specs: [{
                                 id: cur.spec_id,
                                 name: cur.spec,
                                 concurrency_type: {
                                     id: cur.concurrency_type_id,
-                                    name: cur.concurrency_type},
+                                    name: cur.concurrency_type
+                                },
+                                sponsorship_type: {
+                                    id: cur.sponsorship_type_id,
+                                    name: cur.sponsorship_type
+                                },
+                                admission_type: {
+                                    id: cur.admission_type_id,
+                                    name: cur.admission_type
+                                },
+                                degree_type: {
+                                    id: cur.degree_type_id,
+                                    name: cur.degree_type
+                                },
                                 status: {
                                     id: cur.status_id,
                                     name: cur.status
@@ -387,10 +399,11 @@ AND docs.is_doc_original = ${is_doc_original}
                             }],
                         }
                     }
-                    if (!(acc.ege.find(e => e.id === cur.ege_subject_id))) {
-                        acc.ege.push({id: cur.ege_subject_id, name: cur.ege_subject, score: +cur.ege_score})
+                    if (!(acc.exams.ege.find(e => e.id === cur.ege_subject_id))) {
+                        acc.exams.ege.push({id: cur.ege_subject_id, name: cur.ege_subject, score: +cur.ege_score})
                     }
-                    if (!(acc.specs.find(s => s.id === cur.spec_id))) {
+                    const ss = acc.specs.filter(s => s.id === cur.spec_id)
+                    if (!ss.length) {
                         acc.specs.push({
                             id: cur.spec_id,
                             name: cur.spec,
@@ -398,17 +411,149 @@ AND docs.is_doc_original = ${is_doc_original}
                                 id: cur.concurrency_type_id,
                                 name: cur.concurrency_type
                             },
+                            sponsorship_type: {
+                                id: cur.sponsorship_type_id,
+                                name: cur.sponsorship_type
+                            },
+                            admission_type: {
+                                id: cur.admission_type_id,
+                                name: cur.admission_type
+                            },
+                            degree_type: {
+                                id: cur.degree_type_id,
+                                name: cur.degree_type
+                            },
                             status: {
                                 id: cur.status_id,
                                 name: cur.status
                             }
                         })
+                    } else {
+                        if (!(ss.some(s => s.admission_type.id === cur.admission_type_id))) {
+                            acc.specs.push({
+                                id: cur.spec_id,
+                                name: cur.spec,
+                                concurrency_type: {
+                                    id: cur.concurrency_type_id,
+                                    name: cur.concurrency_type
+                                },
+                                sponsorship_type: {
+                                    id: cur.sponsorship_type_id,
+                                    name: cur.sponsorship_type
+                                },
+                                admission_type: {
+                                    id: cur.admission_type_id,
+                                    name: cur.admission_type
+                                },
+                                degree_type: {
+                                    id: cur.degree_type_id,
+                                    name: cur.degree_type
+                                },
+                                status: {
+                                    id: cur.status_id,
+                                    name: cur.status
+                                }
+                            })
+                        }
+                        if (!(ss.some(s => s.concurrency_type.id === cur.concurrency_type_id))) {
+                            acc.specs.push({
+                                id: cur.spec_id,
+                                name: cur.spec,
+                                concurrency_type: {
+                                    id: cur.concurrency_type_id,
+                                    name: cur.concurrency_type
+                                },
+                                sponsorship_type: {
+                                    id: cur.sponsorship_type_id,
+                                    name: cur.sponsorship_type
+                                },
+                                admission_type: {
+                                    id: cur.admission_type_id,
+                                    name: cur.admission_type
+                                },
+                                degree_type: {
+                                    id: cur.degree_type_id,
+                                    name: cur.degree_type
+                                },
+                                status: {
+                                    id: cur.status_id,
+                                    name: cur.status
+                                }
+                            })
+                        }
+                        if (!(ss.some(s => s.sponsorship_type.id === cur.sponsorship_type_id))) {
+                            acc.specs.push({
+                                id: cur.spec_id,
+                                name: cur.spec,
+                                concurrency_type: {
+                                    id: cur.concurrency_type_id,
+                                    name: cur.concurrency_type
+                                },
+                                sponsorship_type: {
+                                    id: cur.sponsorship_type_id,
+                                    name: cur.sponsorship_type
+                                },
+                                admission_type: {
+                                    id: cur.admission_type_id,
+                                    name: cur.admission_type
+                                },
+                                degree_type: {
+                                    id: cur.degree_type_id,
+                                    name: cur.degree_type
+                                },
+                                status: {
+                                    id: cur.status_id,
+                                    name: cur.status
+                                }
+                            })
+                        }
+                        if (!(ss.some(s => s.degree_type.id === cur.degree_type_id))) {
+                            acc.specs.push({
+                                id: cur.spec_id,
+                                name: cur.spec,
+                                concurrency_type: {
+                                    id: cur.concurrency_type_id,
+                                    name: cur.concurrency_type
+                                },
+                                sponsorship_type: {
+                                    id: cur.sponsorship_type_id,
+                                    name: cur.sponsorship_type
+                                },
+                                admission_type: {
+                                    id: cur.admission_type_id,
+                                    name: cur.admission_type
+                                },
+                                degree_type: {
+                                    id: cur.degree_type_id,
+                                    name: cur.degree_type
+                                },
+                                status: {
+                                    id: cur.status_id,
+                                    name: cur.status
+                                }
+                            })
+                        }
                     }
+
                     last = acc
                     return acc
                 }, {})
                 output.shift()
                 output.push(last)
+                for (let o1 of output) {
+                    const o = output2.find(o2 => o2.code1C === o1.code1C)
+                    if (o) {
+                        o1.exams.vi = o.exams.vi
+                    }
+                }
+                const tmp = []
+                for (let o2 of output2) {
+                    const o = output.find(o1 => o1.code1C === o2.code1C)
+                    if (!o) {
+                        tmp.push(o)
+                    }
+                }
+                output.push(...tmp)
                 res.send(output)
             },
         )
@@ -671,5 +816,938 @@ router.route('/applicants/info/:id').get((req, res, next) => {
         )
     })
 })
+
+output2 = [
+    {
+        "code1C": "100095287",
+        "surname": "Шанталь",
+        "name": "Анастасия",
+        "patronymic": "Владимировна",
+        "extra_score": 73,
+        "is_doc_original": false,
+        "enroll_accepted": true,
+        "privileged": false,
+        "dorm_required": false,
+        "date_applied": "2020-06-30T16:27:51.000Z",
+        "exams": {
+            "ege": [],
+            "vi": [
+                {
+                    "id": "000000001",
+                    "name": "Русский язык",
+                    "score": 73
+                },
+                {
+                    "id": "000000005",
+                    "name": "История",
+                    "score": 47
+                },
+                {
+                    "id": "000000006",
+                    "name": "Обществознание",
+                    "score": 49
+                }
+            ]
+        },
+        "specs": [
+            {
+                "id": "266",
+                "name": "Юриспруденция",
+                "concurrency_type": {
+                    "id": "000001229",
+                    "name": "Юриспруденция_очно-заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "269",
+                "name": "Социальная работа",
+                "concurrency_type": {
+                    "id": "000001223",
+                    "name": "Социальная работа_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "266",
+                "name": "Юриспруденция",
+                "concurrency_type": {
+                    "id": "000001228",
+                    "name": "Юриспруденция_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "266",
+                "name": "Юриспруденция",
+                "concurrency_type": {
+                    "id": "000001229",
+                    "name": "Юриспруденция_очно-заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "269",
+                "name": "Социальная работа",
+                "concurrency_type": {
+                    "id": "000001223",
+                    "name": "Социальная работа_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            }
+        ]
+    },
+    {
+        "code1C": "100097028",
+        "surname": "Соболев",
+        "name": "Глеб",
+        "patronymic": "Павлович",
+        "extra_score": 36,
+        "is_doc_original": false,
+        "enroll_accepted": true,
+        "privileged": false,
+        "dorm_required": false,
+        "date_applied": "2018-07-04T12:51:28.000Z",
+        "exams": {
+            "ege": [],
+            "vi": [
+                {
+                    "id": "000000001",
+                    "name": "Русский язык",
+                    "score": 36
+                },
+                {
+                    "id": "000000002",
+                    "name": "Математика",
+                    "score": 86
+                },
+                {
+                    "id": "000000008",
+                    "name": "Физика",
+                    "score": 51
+                }
+            ]
+        },
+        "specs": [
+            {
+                "id": "261",
+                "name": "Бизнес-информатика",
+                "concurrency_type": {
+                    "id": "000001186",
+                    "name": "Бизнес-информатика_оплата"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "261",
+                "name": "Бизнес-информатика",
+                "concurrency_type": {
+                    "id": "000001183",
+                    "name": "Бизнес-информатика"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "261",
+                "name": "Бизнес-информатика",
+                "concurrency_type": {
+                    "id": "000001186",
+                    "name": "Бизнес-информатика_оплата"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            }
+        ]
+    },
+    {
+        "code1C": "100097756",
+        "surname": "Гаврикова",
+        "name": "Виктория",
+        "patronymic": "Ивановна",
+        "extra_score": 85,
+        "is_doc_original": false,
+        "enroll_accepted": true,
+        "privileged": false,
+        "dorm_required": false,
+        "date_applied": "2020-06-25T10:52:14.000Z",
+        "exams": {
+            "ege": [],
+            "vi": [
+                {
+                    "id": "000000001",
+                    "name": "Русский язык",
+                    "score": 85
+                },
+                {
+                    "id": "000000007",
+                    "name": "Химия",
+                    "score": 77
+                },
+                {
+                    "id": "000000002",
+                    "name": "Математика",
+                    "score": 56
+                }
+            ]
+        },
+        "specs": [
+            {
+                "id": "263",
+                "name": "Клиническая психология",
+                "concurrency_type": {
+                    "id": "000001215",
+                    "name": "Клиническая психология"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000002",
+                    "name": "Специалист"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "203",
+                "name": "Психология",
+                "concurrency_type": {
+                    "id": "000001211",
+                    "name": "Психология"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            }
+        ]
+    },
+    {
+        "code1C": "100098736",
+        "surname": "Меркулов",
+        "name": "Максим",
+        "patronymic": "Дмитриевич",
+        "extra_score": 62,
+        "is_doc_original": false,
+        "enroll_accepted": true,
+        "privileged": false,
+        "dorm_required": false,
+        "date_applied": "2020-07-03T12:50:23.000Z",
+        "exams": {
+            "ege": [],
+            "vi": [
+                {
+                    "id": "000000014",
+                    "name": "Информатика и ИКТ",
+                    "score": 62
+                },
+                {
+                    "id": "000000006",
+                    "name": "Обществознание",
+                    "score": 48
+                },
+                {
+                    "id": "000000002",
+                    "name": "Математика",
+                    "score": 68
+                },
+                {
+                    "id": "000000001",
+                    "name": "Русский язык",
+                    "score": 66
+                }
+            ]
+        },
+        "specs": [
+            {
+                "id": "230",
+                "name": "Прикладная информатика",
+                "concurrency_type": {
+                    "id": "000001152",
+                    "name": "Прикладная информатика_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "237",
+                "name": "Программная инженерия",
+                "concurrency_type": {
+                    "id": "000001153",
+                    "name": "Программная инженерия_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "261",
+                "name": "Бизнес-информатика",
+                "concurrency_type": {
+                    "id": "000001187",
+                    "name": "Бизнес-информатика_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "230",
+                "name": "Прикладная информатика",
+                "concurrency_type": {
+                    "id": "000001152",
+                    "name": "Прикладная информатика_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "237",
+                "name": "Программная инженерия",
+                "concurrency_type": {
+                    "id": "000001153",
+                    "name": "Программная инженерия_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "261",
+                "name": "Бизнес-информатика",
+                "concurrency_type": {
+                    "id": "000001187",
+                    "name": "Бизнес-информатика_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            }
+        ]
+    },
+    {
+        "code1C": "100098840",
+        "surname": "Кузьмина",
+        "name": "Александра",
+        "patronymic": "Максимовна",
+        "extra_score": 77,
+        "is_doc_original": false,
+        "enroll_accepted": false,
+        "privileged": false,
+        "dorm_required": false,
+        "date_applied": "2019-06-28T13:27:20.000Z",
+        "exams": {
+            "ege": [],
+            "vi": [
+                {
+                    "id": "000000009",
+                    "name": "Литература",
+                    "score": 77
+                },
+                {
+                    "id": "000000010",
+                    "name": "Английский язык",
+                    "score": 97
+                },
+                {
+                    "id": "000000005",
+                    "name": "История",
+                    "score": 44
+                },
+                {
+                    "id": "000000001",
+                    "name": "Русский язык",
+                    "score": 71
+                }
+            ]
+        },
+        "specs": [
+            {
+                "id": "202",
+                "name": "Лингвистика",
+                "concurrency_type": {
+                    "id": "000001230",
+                    "name": "Лингвистика"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "202",
+                "name": "Лингвистика",
+                "concurrency_type": {
+                    "id": "000001233",
+                    "name": "Лингвистика_оплата"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "202",
+                "name": "Лингвистика",
+                "concurrency_type": {
+                    "id": "000001230",
+                    "name": "Лингвистика"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            }
+        ]
+    },
+    {
+        "code1C": "100099125",
+        "surname": "Самойлов",
+        "name": "Анатолий",
+        "patronymic": "Витальевич",
+        "extra_score": 55,
+        "is_doc_original": false,
+        "enroll_accepted": false,
+        "privileged": false,
+        "dorm_required": true,
+        "date_applied": "2020-06-29T15:29:27.000Z",
+        "exams": {
+            "ege": [],
+            "vi": [
+                {
+                    "id": "000000007",
+                    "name": "Химия",
+                    "score": 55
+                },
+                {
+                    "id": "000000002",
+                    "name": "Математика",
+                    "score": 62
+                },
+                {
+                    "id": "000000001",
+                    "name": "Русский язык",
+                    "score": 87
+                }
+            ]
+        },
+        "specs": [
+            {
+                "id": "217",
+                "name": "Химия, физика и механика материалов",
+                "concurrency_type": {
+                    "id": "000001203",
+                    "name": "Химия, физика и механика материалов"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "273",
+                "name": "Химия",
+                "concurrency_type": {
+                    "id": "000001199",
+                    "name": "Химия"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            }
+        ]
+    },
+    {
+        "code1C": "100100016",
+        "surname": "Маркин",
+        "name": "Владимир",
+        "patronymic": "Романович",
+        "extra_score": 57,
+        "is_doc_original": false,
+        "enroll_accepted": false,
+        "privileged": false,
+        "dorm_required": true,
+        "date_applied": "2019-07-06T11:21:12.000Z",
+        "exams": {
+            "ege": [],
+            "vi": [
+                {
+                    "id": "000000014",
+                    "name": "Информатика и ИКТ",
+                    "score": 57
+                },
+                {
+                    "id": "000000001",
+                    "name": "Русский язык",
+                    "score": 67
+                },
+                {
+                    "id": "000000002",
+                    "name": "Математика",
+                    "score": 56
+                }
+            ]
+        },
+        "specs": [
+            {
+                "id": "231",
+                "name": "Фундаментальная информатика и информационные технологии",
+                "concurrency_type": {
+                    "id": "000001132",
+                    "name": "Фундаментальная информатика и информационные технологии"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "230",
+                "name": "Прикладная информатика",
+                "concurrency_type": {
+                    "id": "000001144",
+                    "name": "Прикладная информатика"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "293     ",
+                "name": "Автоматизация технологических процессов и производств",
+                "concurrency_type": {
+                    "id": "000001154",
+                    "name": "Автоматизация технологических процессов и производств"
+                },
+                "sponsorship_type": {
+                    "id": "000000003",
+                    "name": "Бюджетная основа"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            }
+        ]
+    },
+    {
+        "code1C": "100100895",
+        "surname": "Фомин",
+        "name": "Антон",
+        "patronymic": "Валерьевич",
+        "extra_score": 55,
+        "is_doc_original": true,
+        "enroll_accepted": true,
+        "privileged": false,
+        "dorm_required": true,
+        "date_applied": "2019-07-19T12:29:39.000Z",
+        "exams": {
+            "ege": [],
+            "vi": [
+                {
+                    "id": "000000001",
+                    "name": "Русский язык",
+                    "score": 55
+                },
+                {
+                    "id": "000000014",
+                    "name": "Информатика и ИКТ",
+                    "score": 10
+                },
+                {
+                    "id": "000000002",
+                    "name": "Математика",
+                    "score": 72
+                }
+            ]
+        },
+        "specs": [
+            {
+                "id": "237",
+                "name": "Программная инженерия",
+                "concurrency_type": {
+                    "id": "000001153",
+                    "name": "Программная инженерия_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "287     ",
+                "name": "Технология геологической разведки",
+                "concurrency_type": {
+                    "id": "000001178",
+                    "name": "Технология геологической разведки_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000002",
+                    "name": "Специалист"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            },
+            {
+                "id": "261",
+                "name": "Бизнес-информатика",
+                "concurrency_type": {
+                    "id": "000001187",
+                    "name": "Бизнес-информатика_заочно"
+                },
+                "sponsorship_type": {
+                    "id": "000000002",
+                    "name": "Полное возмещение затрат"
+                },
+                "admission_type": {
+                    "id": "000000003",
+                    "name": "На общих основаниях"
+                },
+                "degree_type": {
+                    "id": "000000001",
+                    "name": "Бакалавр"
+                },
+                "status": {
+                    "id": 0,
+                    "name": "Подано"
+                }
+            }
+        ]
+    }
+]
 
 module.exports = router
