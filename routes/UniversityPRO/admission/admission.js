@@ -1,7 +1,10 @@
 const router = require('express').Router()
 const sql = require('mssql')
 const pool = require('../../../config/config_universityPROF')
+const poolConnection = pool.connect()
 const {loggerPriem} = require('../../../lib/logger')
+const concurrency_types_vi = require('./concurrency_types_vi.json')
+const concurrency_types_no_vi = require('./concurrency_types_no_vi.json')
 
 const getSpecialityInfo = (req, res, year) => {
     pool.connect((err) => {
@@ -356,7 +359,7 @@ AND docs.is_doc_original = ${is_doc_original}
                 const output = []
                 let last = null
                 result.recordset.reduce((acc, cur) => {
-                    if (acc.code1C !== cur.code1C ) {
+                    if (acc.code1C !== cur.code1C) {
                         output.push(acc)
                         return {
                             code1C: cur.code1C,
@@ -561,54 +564,67 @@ AND docs.is_doc_original = ${is_doc_original}
 })
 
 
-
 router.route('/concurrency_types').get((req, res, next) => {
-    pool.connect((err) => {
-        if (err) res.sendStatus(400)
+    let last = null
+    const output1 = []
+    concurrency_types_vi.reduce((acc, cur) => {
+        if (acc.id !== cur.id) {
+            output1.push(acc)
+            return {
+                id: cur.id,
+                name: cur.name,
+                subjects: [cur.subject],
+            }
+        }
+        acc.subjects.push(cur.subject)
+        last = acc
+        return acc
+    }, {})
+    output1.shift()
+    output1.push(last)
 
-        const request = new sql.Request(pool)
-        request.query(
-            `
-SELECT
-        kon.Код id
-        ,kon.Наименование name
-        ,disc.Наименование subject
-FROM Справочник_КонкурсныеГруппы kon
-         INNER JOIN Справочник_КонкурсныеГруппы_ВступительныеИспытания as konIsp on kon.Ссылка = konIsp.Ссылка
-         INNER JOIN Справочник_НаборыВступительныхИспытаний as isp on isp.Ссылка = konIsp.НаборВступительныхИспытаний_Ссылка
-         INNER JOIN Справочник_НаборыВступительныхИспытаний_Предметы as ispPredmet on ispPredmet.Ссылка = isp.Ссылка
-         INNER JOIN Справочник_Дисциплины as disc on disc.Ссылка = ispPredmet.Предмет_Ссылка
-where kon.ПриемнаяКампания_Ссылка = 0x81246C626D51EA7011E9E5E0CDC97253
-group by kon.Код, kon.Наименование, disc.Наименование
-order by kon.Код`,
-            (err, result) => {
-                if (err) {
-                    loggerPriem.log('error', 'Get concurrency_types error', {
-                        err,
-                    })
-                    res.sendStatus(400)
-                }
-
-                pool.close()
-
-                const output = []
-                result.recordset.reduce((acc, cur) => {
-                    if (acc.id !== cur.id ) {
-                        output.push(acc)
-                        return {
-                            id: cur.id,
-                            name: cur.name,
-                            subjects: [cur.subject],
-                        }
-                    }
-                    acc.subjects.push(cur.subject)
-                    return acc
-                }, {})
-                output.shift()
-                res.send(output)
-            },
-        )
-    })
+    const output2 = []
+    concurrency_types_no_vi.reduce((acc, cur) => {
+        if (acc.id !== cur.id) {
+            output2.push(acc)
+            return {
+                id: cur.id,
+                name: cur.name,
+                study_types: [{id: cur.study_type_id, name: cur.study_type}],
+                specs: [{id: cur.spec_id, name: cur.spec}],
+                degrees: [{id: cur.degree_type_id, name: cur.degree_type}],
+                sponsorships: [{id: cur.sponsorship_type_id, name: cur.sponsorship_type}],
+                privileged_accepted: [cur.privileged_accepted],
+            }
+        }
+        if (!(acc.study_types.find(e => e.id === cur.study_type_id))) {
+            acc.study_types.push({id: cur.study_type_id, name: cur.study_type})
+        }
+        if (!(acc.specs.find(e => e.id === cur.spec_id))) {
+            acc.specs.push({id: cur.spec_id, name: cur.spec})
+        }
+        if (!(acc.degrees.find(e => e.id === cur.degree_type_id))) {
+            acc.degrees.push({id: cur.degree_type_id, name: cur.degree_type})
+        }
+        if (!(acc.sponsorships.find(e => e.id === cur.sponsorship_type_id))) {
+            acc.sponsorships.push({id: cur.sponsorship_type_id, name: cur.sponsorship_type})
+        }
+        if (!(acc.privileged_accepted.includes(cur.privileged_accepted))) {
+            acc.privileged_accepted.push(cur.privileged_accepted)
+        }
+        last = acc
+        return acc
+    }, {})
+    output2.shift()
+    output2.push(last)
+    const output3 = []
+    for (let o1 of output1) {
+        const o = output2.find(o2 => o2.id === o1.id)
+        if (o) {
+            output3.push(Object.assign(o1, o))
+        }
+    }
+    res.send(output3)
 })
 
 
