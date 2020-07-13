@@ -245,8 +245,470 @@ router.route('/newSpecialities/people/:code').get((req, res, next) => {
         )
     })
 })
+router.route('/test').get(async (req, res, next) => {
+    let {
+        code1C = 'code1C',
+        is_doc_original = 'is_doc_original',
+        enroll_accepted = 'enroll_accepted',
+        dorm_required = 'dorm_required',
+        privileged = 'privileged',
+        spec_id = 'spec_id',
+        status_id = 'status_id',
+        subject_id = 'subject_id',
+        degree_type_id = 'degree_type_id',
+        admission_type_id = 'admission_type_id',
+        concurrency_type_id = 'concurrency_type_id',
+        sponsorship_type_id = 'sponsorship_type_id',
+    } = req.body
+    if (!(is_doc_original === 'is_doc_original')) {
+        is_doc_original = is_doc_original === 'true' ? 1 : 0
+    }
+    if (!(dorm_required === 'dorm_required')) {
+        dorm_required = dorm_required === 'true' ? 1 : 0
+    }
+    if (!(enroll_accepted === 'enroll_accepted')) {
+        enroll_accepted = enroll_accepted === 'true' ? 1 : 0
+    }
+    if (!(privileged === 'privileged')) {
+        privileged = privileged === 'true' ? 1 : 0
+    }
+    await poolConnection
+    let result1 = null
+    let result2 = null
+    try {
+        const request = pool.request()
+        result1 = await request.query(`
+select *
+from ic_admission_bachelors_ege
+where
+      code1C = ${code1C}
+  AND admission_type_id = ${admission_type_id}
+  AND concurrency_type_id = ${concurrency_type_id}
+  AND sponsorship_type_id = ${sponsorship_type_id}
+  AND degree_type_id = ${degree_type_id}
+  AND subject_id = ${subject_id}
+  AND spec_id = ${spec_id}
+  AND status_id = ${status_id}
+AND is_doc_original = ${is_doc_original}
+  AND dorm_required = ${dorm_required}
+  AND enroll_accepted = ${enroll_accepted}
+  AND privileged = ${privileged}
+  order by code1C
+  `)
+        result2 = await request.query(`
+select *
+from ic_admission_bachelors_ege
+where
+      code1C = ${code1C}
+  AND admission_type_id = ${admission_type_id}
+  AND concurrency_type_id = ${concurrency_type_id}
+  AND sponsorship_type_id = ${sponsorship_type_id}
+  AND degree_type_id = ${degree_type_id}
+  AND subject_id = ${subject_id}
+  AND spec_id = ${spec_id}
+  AND status_id = ${status_id}
+AND is_doc_original = ${is_doc_original}
+  AND dorm_required = ${dorm_required}
+  AND enroll_accepted = ${enroll_accepted}
+  AND privileged = ${privileged}
+  order by code1C
+        `)
+    } catch (e) {
 
-router.route('/applicants').get((req, res, next) => {
+    }
+    const output1 = []
+    let last = null
+    result1.recordset.reduce((acc, cur) => {
+        if (acc.code1C !== cur.code1C) {
+            output1.push(acc)
+            return {
+                code1C: cur.code1C,
+                surname: cur.surname,
+                name: cur.name,
+                patronymic: cur.patronymic,
+                extra_score: +cur.extra_score,
+                is_doc_original: !!cur.is_doc_original,
+                enroll_accepted: !!cur.enroll_accepted,
+                privileged: !!cur.privileged,
+                dorm_required: !!cur.dorm_required,
+                date_applied: cur.date_applied,
+                exams: {
+                    ege: [{id: cur.subject_id, name: cur.subject, score: +cur.score}],
+                    vi: []
+                },
+                specs: [{
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                }],
+            }
+        }
+        if (!(acc.exams.ege.find(e => e.id === cur.subject_id))) {
+            acc.exams.ege.push({id: cur.subject_id, name: cur.subject, score: +cur.score})
+        }
+        const ss = acc.specs.filter(s => s.id === cur.spec_id)
+        if (!ss.length) {
+            acc.specs.push({
+                id: cur.spec_id,
+                name: cur.spec,
+                concurrency_type: {
+                    id: cur.concurrency_type_id,
+                    name: cur.concurrency_type
+                },
+                sponsorship_type: {
+                    id: cur.sponsorship_type_id,
+                    name: cur.sponsorship_type
+                },
+                admission_type: {
+                    id: cur.admission_type_id,
+                    name: cur.admission_type
+                },
+                degree_type: {
+                    id: cur.degree_type_id,
+                    name: cur.degree_type
+                },
+                status: {
+                    id: cur.status_id,
+                    name: cur.status
+                }
+            })
+        } else {
+            if (!(ss.some(s => s.admission_type.id === cur.admission_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.concurrency_type.id === cur.concurrency_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.sponsorship_type.id === cur.sponsorship_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.degree_type.id === cur.degree_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+        }
+
+        last = acc
+        return acc
+    }, {})
+    output1.shift()
+    output1.push(last)
+    const output2 = []
+    result2.recordset.reduce((acc, cur) => {
+        if (acc.code1C !== cur.code1C) {
+            output2.push(acc)
+            return {
+                code1C: cur.code1C,
+                surname: cur.surname,
+                name: cur.name,
+                patronymic: cur.patronymic,
+                extra_score: +cur.extra_score,
+                is_doc_original: !!cur.is_doc_original,
+                enroll_accepted: !!cur.enroll_accepted,
+                privileged: !!cur.privileged,
+                dorm_required: !!cur.dorm_required,
+                date_applied: cur.date_applied,
+                exams: {
+                    ege: [],
+                    vi: [{id: cur.subject_id, name: cur.subject, score: +cur.score}]
+                },
+                specs: [{
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                }],
+            }
+        }
+        if (!(acc.exams.vi.find(e => e.id === cur.subject_id))) {
+            acc.exams.vi.push({id: cur.subject_id, name: cur.subject, score: +cur.score})
+        }
+        const ss = acc.specs.filter(s => s.id === cur.spec_id)
+        if (!ss.length) {
+            acc.specs.push({
+                id: cur.spec_id,
+                name: cur.spec,
+                concurrency_type: {
+                    id: cur.concurrency_type_id,
+                    name: cur.concurrency_type
+                },
+                sponsorship_type: {
+                    id: cur.sponsorship_type_id,
+                    name: cur.sponsorship_type
+                },
+                admission_type: {
+                    id: cur.admission_type_id,
+                    name: cur.admission_type
+                },
+                degree_type: {
+                    id: cur.degree_type_id,
+                    name: cur.degree_type
+                },
+                status: {
+                    id: cur.status_id,
+                    name: cur.status
+                }
+            })
+        } else {
+            if (!(ss.some(s => s.admission_type.id === cur.admission_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.concurrency_type.id === cur.concurrency_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.sponsorship_type.id === cur.sponsorship_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.degree_type.id === cur.degree_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+        }
+
+        last = acc
+        return acc
+    }, {})
+    output2.shift()
+    output2.push(last)
+    const output3 = []
+    for (let o1 of output1) {
+        const o = output2.find(o2 => o2.code1C === o1.code1C)
+        if (o) {
+            o1.exams.vi = o.exams.vi
+        }
+        output3.push(o1)
+    }
+    const tmp = []
+    for (let o2 of output2) {
+        const o = output1.find(o1 => o1.code1C === o2.code1C)
+        if (!o) {
+            tmp.push(o)
+        }
+    }
+    output3.push(...tmp)
+    res.send(output3)
+})
+
+router.route('/applicants').get(async (req, res, next) => {
     let {
         code1C = 'docs.code1C',
         is_doc_original = 'docs.is_doc_original',
@@ -255,7 +717,7 @@ router.route('/applicants').get((req, res, next) => {
         privileged = 'docs.privileged',
         spec_id = 'docs.spec_id',
         status_id = 'docs.status_id',
-        subject_id = 'docs.ege_subject_id',
+        subject_id = 'docs.subject_id',
         degree_type_id = 'docs.degree_type_id',
         admission_type_id = 'docs.admission_type_id',
         concurrency_type_id = 'docs.concurrency_type_id',
@@ -273,15 +735,12 @@ router.route('/applicants').get((req, res, next) => {
     if (!(privileged === 'docs.privileged')) {
         privileged = privileged === 'true' ? 1 : 0
     }
-    pool.connect((err) => {
-        if (err) {
-            console.log(err)
-            res.sendStatus(400)
-        }
-
-        const request = new sql.Request(pool)
-        request.query(
-            `
+    await poolConnection
+    let result1 = null
+    let result2 = null
+    try {
+        const request = pool.request()
+        result1 = await request.query(`
             select * from (SELECT top(5000)
                    fiz.Код code1C
                        ,fiz.Фамилия surname
@@ -303,9 +762,9 @@ router.route('/applicants').get((req, res, next) => {
                        ,kp.код admission_type_id
                        ,urov.Наименование degree_type
                        ,urov.код degree_type_id
-                       ,dis.Наименование ege_subject
-                       ,dis.код ege_subject_id
-                       ,ot.Наименование ege_score
+                       ,dis.Наименование subject
+                       ,dis.код subject_id
+                       ,ot.Наименование score
                        ,perecSostName.EnumValue status
                        ,perecSostName.enumorder status_id
                FROM Справочник_ФизическиеЛица fiz
@@ -328,7 +787,7 @@ router.route('/applicants').get((req, res, next) => {
                         left join
                     Документ_ЗаявлениеПоступающего
                         zaya on zaya.ФизическоеЛицо_Ссылка = fiz.Ссылка
-                        left join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка
+                        left join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка and np.КонкурснаяГруппа_Ссылка = kon.Ссылка
                         left join dbo.Справочник_ОснованияПоступления op on np.ОснованиеПоступления_Ссылка = op.Ссылка
                         left join dbo.Справочник_КатегорииПриема kp on np.КатегорияПриема_Ссылка = kp.Ссылка) docs
 where
@@ -337,7 +796,7 @@ where
   AND docs.concurrency_type_id = ${concurrency_type_id}
   AND docs.sponsorship_type_id = ${sponsorship_type_id}
   AND docs.degree_type_id = ${degree_type_id}
-  AND docs.ege_subject_id = ${subject_id}
+  AND docs.subject_id = ${subject_id}
   AND docs.spec_id = ${spec_id}
   AND docs.status_id = ${status_id}
 AND docs.is_doc_original = ${is_doc_original}
@@ -345,258 +804,498 @@ AND docs.is_doc_original = ${is_doc_original}
   AND docs.enroll_accepted = ${enroll_accepted}
   AND docs.privileged = ${privileged}
   order by docs.code1C
-  `,
-            (err, result) => {
-                if (err) {
-                    console.log(err)
-                    loggerPriem.log('error', 'Get admission/applicants error', {
-                        err,
-                    })
-                    res.sendStatus(400)
-                }
-
-                pool.close()
-                const output = []
-                let last = null
-                result.recordset.reduce((acc, cur) => {
-                    if (acc.code1C !== cur.code1C) {
-                        output.push(acc)
-                        return {
-                            code1C: cur.code1C,
-                            surname: cur.surname,
-                            name: cur.name,
-                            patronymic: cur.patronymic,
-                            extra_score: +cur.extra_score,
-                            is_doc_original: !!cur.is_doc_original,
-                            enroll_accepted: !!cur.enroll_accepted,
-                            privileged: !!cur.privileged,
-                            dorm_required: !!cur.dorm_required,
-                            date_applied: cur.date_applied,
-                            exams: {
-                                ege: [{id: cur.ege_subject_id, name: cur.ege_subject, score: +cur.ege_score}],
-                                vi: []
-                            },
-                            specs: [{
-                                id: cur.spec_id,
-                                name: cur.spec,
-                                concurrency_type: {
-                                    id: cur.concurrency_type_id,
-                                    name: cur.concurrency_type
-                                },
-                                sponsorship_type: {
-                                    id: cur.sponsorship_type_id,
-                                    name: cur.sponsorship_type
-                                },
-                                admission_type: {
-                                    id: cur.admission_type_id,
-                                    name: cur.admission_type
-                                },
-                                degree_type: {
-                                    id: cur.degree_type_id,
-                                    name: cur.degree_type
-                                },
-                                status: {
-                                    id: cur.status_id,
-                                    name: cur.status
-                                }
-                            }],
-                        }
-                    }
-                    if (!(acc.exams.ege.find(e => e.id === cur.ege_subject_id))) {
-                        acc.exams.ege.push({id: cur.ege_subject_id, name: cur.ege_subject, score: +cur.ege_score})
-                    }
-                    const ss = acc.specs.filter(s => s.id === cur.spec_id)
-                    if (!ss.length) {
-                        acc.specs.push({
-                            id: cur.spec_id,
-                            name: cur.spec,
-                            concurrency_type: {
-                                id: cur.concurrency_type_id,
-                                name: cur.concurrency_type
-                            },
-                            sponsorship_type: {
-                                id: cur.sponsorship_type_id,
-                                name: cur.sponsorship_type
-                            },
-                            admission_type: {
-                                id: cur.admission_type_id,
-                                name: cur.admission_type
-                            },
-                            degree_type: {
-                                id: cur.degree_type_id,
-                                name: cur.degree_type
-                            },
-                            status: {
-                                id: cur.status_id,
-                                name: cur.status
-                            }
-                        })
-                    } else {
-                        if (!(ss.some(s => s.admission_type.id === cur.admission_type_id))) {
-                            acc.specs.push({
-                                id: cur.spec_id,
-                                name: cur.spec,
-                                concurrency_type: {
-                                    id: cur.concurrency_type_id,
-                                    name: cur.concurrency_type
-                                },
-                                sponsorship_type: {
-                                    id: cur.sponsorship_type_id,
-                                    name: cur.sponsorship_type
-                                },
-                                admission_type: {
-                                    id: cur.admission_type_id,
-                                    name: cur.admission_type
-                                },
-                                degree_type: {
-                                    id: cur.degree_type_id,
-                                    name: cur.degree_type
-                                },
-                                status: {
-                                    id: cur.status_id,
-                                    name: cur.status
-                                }
-                            })
-                        }
-                        if (!(ss.some(s => s.concurrency_type.id === cur.concurrency_type_id))) {
-                            acc.specs.push({
-                                id: cur.spec_id,
-                                name: cur.spec,
-                                concurrency_type: {
-                                    id: cur.concurrency_type_id,
-                                    name: cur.concurrency_type
-                                },
-                                sponsorship_type: {
-                                    id: cur.sponsorship_type_id,
-                                    name: cur.sponsorship_type
-                                },
-                                admission_type: {
-                                    id: cur.admission_type_id,
-                                    name: cur.admission_type
-                                },
-                                degree_type: {
-                                    id: cur.degree_type_id,
-                                    name: cur.degree_type
-                                },
-                                status: {
-                                    id: cur.status_id,
-                                    name: cur.status
-                                }
-                            })
-                        }
-                        if (!(ss.some(s => s.sponsorship_type.id === cur.sponsorship_type_id))) {
-                            acc.specs.push({
-                                id: cur.spec_id,
-                                name: cur.spec,
-                                concurrency_type: {
-                                    id: cur.concurrency_type_id,
-                                    name: cur.concurrency_type
-                                },
-                                sponsorship_type: {
-                                    id: cur.sponsorship_type_id,
-                                    name: cur.sponsorship_type
-                                },
-                                admission_type: {
-                                    id: cur.admission_type_id,
-                                    name: cur.admission_type
-                                },
-                                degree_type: {
-                                    id: cur.degree_type_id,
-                                    name: cur.degree_type
-                                },
-                                status: {
-                                    id: cur.status_id,
-                                    name: cur.status
-                                }
-                            })
-                        }
-                        if (!(ss.some(s => s.degree_type.id === cur.degree_type_id))) {
-                            acc.specs.push({
-                                id: cur.spec_id,
-                                name: cur.spec,
-                                concurrency_type: {
-                                    id: cur.concurrency_type_id,
-                                    name: cur.concurrency_type
-                                },
-                                sponsorship_type: {
-                                    id: cur.sponsorship_type_id,
-                                    name: cur.sponsorship_type
-                                },
-                                admission_type: {
-                                    id: cur.admission_type_id,
-                                    name: cur.admission_type
-                                },
-                                degree_type: {
-                                    id: cur.degree_type_id,
-                                    name: cur.degree_type
-                                },
-                                status: {
-                                    id: cur.status_id,
-                                    name: cur.status
-                                }
-                            })
-                        }
-                    }
-
-                    last = acc
-                    return acc
-                }, {})
-                output.shift()
-                output.push(last)
-                for (let o1 of output) {
-                    const o = output2.find(o2 => o2.code1C === o1.code1C)
-                    if (o) {
-                        o1.exams.vi = o.exams.vi
-                    }
-                }
-                const tmp = []
-                for (let o2 of output2) {
-                    const o = output.find(o1 => o1.code1C === o2.code1C)
-                    if (!o) {
-                        tmp.push(o)
-                    }
-                }
-                output.push(...tmp)
-                res.send(output)
-            },
-        )
-    })
-})
-
-
-router.route('/concurrency_types').get((req, res, next) => {
-    let last = null
+  `)
+        result2 = await request.query(`
+        select * from (SELECT top(5000)
+                   fiz.Код code1C
+        ,fiz.Фамилия surname
+        ,fiz.Имя name
+        ,fiz.Отчество patronymic
+        ,isnull(ot_dost.Наименование, 0) extra_score
+        ,iif(np.ВидДокумента_Ссылка = 0x8BAD2D90F32DA6BF4DE0752D2C86A672, 0, 1) is_doc_original
+        ,iif(perecSoglName.EnumValue = 'Подано', 1, 0) enroll_accepted
+        ,iif(kp.Наименование = 'Имеющие особое право', 1, 0) privileged
+        ,iif(zaya.НеобходимостьВОбщежитии = 0x00, 0, 1) dorm_required
+        ,iif(year(zaya.Дата) > year(getdate()), dateadd(year, -2000, zaya.Дата), zaya.Дата) date_applied
+        ,spec.Наименование spec
+        ,spec.код spec_id
+        ,op.Наименование sponsorship_type
+        ,op.код sponsorship_type_id
+        ,kon.Наименование concurrency_type
+        ,kon.код concurrency_type_id
+        ,kp.Наименование admission_type
+        ,kp.код admission_type_id
+        ,urov.Наименование degree_type
+        ,urov.код degree_type_id
+        ,dis.Наименование subject
+        ,dis.код subject_id
+        ,ot.Наименование score
+        ,perecSostName.EnumValue status
+        ,perecSostName.enumorder status_id
+FROM Справочник_ФизическиеЛица fiz
+LEFT JOIN РегистрСведений_СостояниеЗаявленийПоступающих sostZaya on fiz.Ссылка = sostZaya.ФизическоеЛицо_Ссылка
+inner JOIN Справочник_КонкурсныеГруппы kon on sostZaya.КонкурснаяГруппа_Ссылка = kon.Ссылка and kon.ПриемнаяКампания_Ссылка = 0x81246C626D51EA7011E9E5E0CDC97253
+LEFT JOIN Справочник_УровеньПодготовки urov on kon.УровеньПодготовки_Ссылка = urov.Ссылка
+inner join РегистрСведений_РезультатыВступительныхИспытаний rvi on rvi.ФизическоеЛицо_Ссылка = fiz.Ссылка and rvi.ПриемнаяКампания_Ссылка = 0x81246C626D51EA7011E9E5E0CDC97253
+left join Справочник_Отметки ot on ot.Ссылка = rvi.Оценка_Ссылка
+left join Справочник_Дисциплины dis on dis.Ссылка = rvi.Предмет_Ссылка
+LEFT JOIN Документ_УчетДостиженийАбитуриентов dost on dost.ФизическоеЛицо_Ссылка = fiz.Ссылка
+LEFT JOIN Документ_УчетДостиженийАбитуриентов_Достижения res_dost on dost.Ссылка = res_dost.Ссылка
+LEFT JOIN Справочник_Отметки ot_dost on res_dost.Балл_Ссылка = ot_dost.Ссылка
+LEFT JOIN Справочник_Специальности spec on spec.Ссылка = kon.Специальность_Ссылка
+LEFT JOIN Перечисление_СостоянияЗаявленийПоступающих perecSost on perecSost.Ссылка = sostZaya.Состояние_Ссылка
+LEFT JOIN п_СостоянияЗаявленийПоступающих perecSostName on perecSostName.EnumOrder = perecSost.Порядок
+left JOIN РегистрСведений_СогласияНаЗачисление sogl on sogl.ФизическоеЛицо_Ссылка = fiz.Ссылка
+left JOIN Перечисление_СостоянияСогласийНаЗачисление perecSogl on perecSogl.Ссылка = sogl.Состояние_Ссылка
+left JOIN п_СостоянияСогласийНаЗачисление perecSoglName on perecSoglName.EnumOrder = perecSogl.Порядок
+left join Документ_ЗаявлениеПоступающего zaya on zaya.ФизическоеЛицо_Ссылка = fiz.Ссылка
+left join Документ_ЗаявлениеПоступающего_НаправленияПодготовки np on np.Ссылка = zaya.Ссылка and np.КонкурснаяГруппа_Ссылка = kon.Ссылка
+left join dbo.Справочник_ОснованияПоступления op on np.ОснованиеПоступления_Ссылка = op.Ссылка
+left join dbo.Справочник_КатегорииПриема kp on np.КатегорияПриема_Ссылка = kp.Ссылка) docs
+where
+      docs.code1C = ${code1C}
+  AND docs.admission_type_id = ${admission_type_id}
+  AND docs.concurrency_type_id = ${concurrency_type_id}
+  AND docs.sponsorship_type_id = ${sponsorship_type_id}
+  AND docs.degree_type_id = ${degree_type_id}
+  AND docs.subject_id = ${subject_id}
+  AND docs.spec_id = ${spec_id}
+  AND docs.status_id = ${status_id}
+AND docs.is_doc_original = ${is_doc_original}
+  AND docs.dorm_required = ${dorm_required}
+  AND docs.enroll_accepted = ${enroll_accepted}
+  AND docs.privileged = ${privileged}
+order by docs.code1C`)
+    } catch (err) {
+        console.error('UNIVERSITYPROF.Admission error: ', err)
+    }
     const output1 = []
-    concurrency_types_vi.reduce((acc, cur) => {
-        if (acc.id !== cur.id) {
+    let last = null
+    result1.recordset.reduce((acc, cur) => {
+        if (acc.code1C !== cur.code1C) {
             output1.push(acc)
             return {
-                id: cur.id,
+                code1C: cur.code1C,
+                surname: cur.surname,
                 name: cur.name,
-                subjects: [cur.subject],
+                patronymic: cur.patronymic,
+                extra_score: +cur.extra_score,
+                is_doc_original: !!cur.is_doc_original,
+                enroll_accepted: !!cur.enroll_accepted,
+                privileged: !!cur.privileged,
+                dorm_required: !!cur.dorm_required,
+                date_applied: cur.date_applied,
+                exams: {
+                    ege: [{id: cur.subject_id, name: cur.subject, score: +cur.score}],
+                    vi: []
+                },
+                specs: [{
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                }],
             }
         }
-        acc.subjects.push(cur.subject)
+        if (!(acc.exams.ege.find(e => e.id === cur.subject_id))) {
+            acc.exams.ege.push({id: cur.subject_id, name: cur.subject, score: +cur.score})
+        }
+        const ss = acc.specs.filter(s => s.id === cur.spec_id)
+        if (!ss.length) {
+            acc.specs.push({
+                id: cur.spec_id,
+                name: cur.spec,
+                concurrency_type: {
+                    id: cur.concurrency_type_id,
+                    name: cur.concurrency_type
+                },
+                sponsorship_type: {
+                    id: cur.sponsorship_type_id,
+                    name: cur.sponsorship_type
+                },
+                admission_type: {
+                    id: cur.admission_type_id,
+                    name: cur.admission_type
+                },
+                degree_type: {
+                    id: cur.degree_type_id,
+                    name: cur.degree_type
+                },
+                status: {
+                    id: cur.status_id,
+                    name: cur.status
+                }
+            })
+        } else {
+            if (!(ss.some(s => s.admission_type.id === cur.admission_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.concurrency_type.id === cur.concurrency_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.sponsorship_type.id === cur.sponsorship_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.degree_type.id === cur.degree_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+        }
+
         last = acc
         return acc
     }, {})
     output1.shift()
     output1.push(last)
-
     const output2 = []
-    concurrency_types_no_vi.reduce((acc, cur) => {
-        if (acc.id !== cur.id) {
+    result2.recordset.reduce((acc, cur) => {
+        if (acc.code1C !== cur.code1C) {
             output2.push(acc)
             return {
-                id: cur.id,
+                code1C: cur.code1C,
+                surname: cur.surname,
                 name: cur.name,
+                patronymic: cur.patronymic,
+                extra_score: +cur.extra_score,
+                is_doc_original: !!cur.is_doc_original,
+                enroll_accepted: !!cur.enroll_accepted,
+                privileged: !!cur.privileged,
+                dorm_required: !!cur.dorm_required,
+                date_applied: cur.date_applied,
+                exams: {
+                    ege: [],
+                    vi: [{id: cur.subject_id, name: cur.subject, score: +cur.score}]
+                },
+                specs: [{
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                }],
+            }
+        }
+        if (!(acc.exams.vi.find(e => e.id === cur.subject_id))) {
+            acc.exams.vi.push({id: cur.subject_id, name: cur.subject, score: +cur.score})
+        }
+        const ss = acc.specs.filter(s => s.id === cur.spec_id)
+        if (!ss.length) {
+            acc.specs.push({
+                id: cur.spec_id,
+                name: cur.spec,
+                concurrency_type: {
+                    id: cur.concurrency_type_id,
+                    name: cur.concurrency_type
+                },
+                sponsorship_type: {
+                    id: cur.sponsorship_type_id,
+                    name: cur.sponsorship_type
+                },
+                admission_type: {
+                    id: cur.admission_type_id,
+                    name: cur.admission_type
+                },
+                degree_type: {
+                    id: cur.degree_type_id,
+                    name: cur.degree_type
+                },
+                status: {
+                    id: cur.status_id,
+                    name: cur.status
+                }
+            })
+        } else {
+            if (!(ss.some(s => s.admission_type.id === cur.admission_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.concurrency_type.id === cur.concurrency_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.sponsorship_type.id === cur.sponsorship_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+            if (!(ss.some(s => s.degree_type.id === cur.degree_type_id))) {
+                acc.specs.push({
+                    id: cur.spec_id,
+                    name: cur.spec,
+                    concurrency_type: {
+                        id: cur.concurrency_type_id,
+                        name: cur.concurrency_type
+                    },
+                    sponsorship_type: {
+                        id: cur.sponsorship_type_id,
+                        name: cur.sponsorship_type
+                    },
+                    admission_type: {
+                        id: cur.admission_type_id,
+                        name: cur.admission_type
+                    },
+                    degree_type: {
+                        id: cur.degree_type_id,
+                        name: cur.degree_type
+                    },
+                    status: {
+                        id: cur.status_id,
+                        name: cur.status
+                    }
+                })
+            }
+        }
+
+        last = acc
+        return acc
+    }, {})
+    output2.shift()
+    output2.push(last)
+    const output3 = []
+    for (let o1 of output1) {
+        const o = output2.find(o2 => o2.code1C === o1.code1C)
+        if (o) {
+            o1.exams.vi = o.exams.vi
+        }
+        output3.push(o1)
+    }
+    const tmp = []
+    for (let o2 of output2) {
+        const o = output1.find(o1 => o1.code1C === o2.code1C)
+        if (!o) {
+            tmp.push(o)
+        }
+    }
+    output3.push(...tmp)
+    res.send(output3)
+})
+
+
+router.route('/concurrency_types').get(async (req, res, next) => {
+    await poolConnection
+    let result = null
+    try {
+        const request = pool.request()
+        result = await request.query(`
+select *
+from ic_admission_concurrency_types_bachelor
+order by concurrency_type_id
+  `)
+    } catch (err) {
+        console.error('UNIVERSITYPROF admission/concurrency_types error: ', err)
+    }
+    let last = null
+    const output = []
+    result.recordset.reduce((acc, cur) => {
+        if (acc.id !== cur.concurrency_type_id) {
+            output.push(acc)
+            return {
+                id: cur.concurrency_type_id,
+                name: cur.concurrency_type,
                 study_types: [{id: cur.study_type_id, name: cur.study_type}],
-                specs: [{id: cur.spec_id, name: cur.spec}],
+                subjects: [cur.subject],
+                specs: [{id: cur.spec_id, name: cur.spec, code: cur.spec_code}],
                 degrees: [{id: cur.degree_type_id, name: cur.degree_type}],
                 sponsorships: [{id: cur.sponsorship_type_id, name: cur.sponsorship_type}],
                 privileged_accepted: [cur.privileged_accepted],
+                places_amount_current: cur.places_amount_current,
+                places_amount: cur.places_amount,
+                places_amount_state_funded: cur.places_amount_state_funded,
             }
         }
+        acc.subjects.push(cur.subject)
+        // TODO: Cделать 1 к 1, т.е. study_type: { id, name}
         if (!(acc.study_types.find(e => e.id === cur.study_type_id))) {
             acc.study_types.push({id: cur.study_type_id, name: cur.study_type})
         }
@@ -615,16 +1314,9 @@ router.route('/concurrency_types').get((req, res, next) => {
         last = acc
         return acc
     }, {})
-    output2.shift()
-    output2.push(last)
-    const output3 = []
-    for (let o1 of output1) {
-        const o = output2.find(o2 => o2.id === o1.id)
-        if (o) {
-            output3.push(Object.assign(o1, o))
-        }
-    }
-    res.send(output3)
+    output.shift()
+    output.push(last)
+    res.send(output)
 })
 
 
