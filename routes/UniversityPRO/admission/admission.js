@@ -727,7 +727,7 @@ AND is_doc_original = ${is_doc_original}
     for (let o2 of output2) {
       const o = output1.find((o1) => o1.code1C === o2.code1C)
       if (!o) {
-        tmp.push(o)
+        tmp.push(o2)
       }
     }
     output3.push(...tmp)
@@ -771,6 +771,8 @@ order by concurrency_type_id
           places_amount_current: cur.places_amount_current,
           places_amount: cur.places_amount,
           places_amount_state_funded: cur.places_amount_state_funded,
+          document_received: cur.document_received,
+          document_received_orig: cur.document_received_orig,
         }
       }
       acc.subjects.push({
