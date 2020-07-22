@@ -1,10 +1,9 @@
 const router = require('express').Router()
 const sql = require('mssql')
-const pool = require('../../../config/config_universityPROF')
-const poolConnection = pool.connect()
+const pool = require('../../../config/config_universityPROF').pool
+const poolConnection = require('../../../config/config_universityPROF')
+  .poolConnection
 const { loggerPriem } = require('../../../lib/logger')
-const concurrency_types_vi = require('./concurrency_types_vi.json')
-const concurrency_types_no_vi = require('./concurrency_types_no_vi.json')
 
 const getSpecialityInfo = (req, res, year) => {
   pool.connect((err) => {

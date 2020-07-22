@@ -7,4 +7,7 @@ const pool = new sql.ConnectionPool({
   database: process.env.DB_DATABASE_PROF,
 })
 
-module.exports = pool
+const poolConnection = pool.connect()
+
+module.exports.pool = pool
+module.exports.poolConnection = poolConnection
