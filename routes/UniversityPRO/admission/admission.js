@@ -275,7 +275,7 @@ router.route('/applicants').get(async (req, res, next) => {
   await poolConnection
   try {
     const request = pool.request()
-    const result1 = await request.query(`
+    let result1 = request.query(`
 select *
 from ic_admission_bachelors_ege
 where
@@ -291,9 +291,8 @@ AND is_doc_original = ${is_doc_original}
   AND dorm_required = ${dorm_required}
   AND enroll_accepted = ${enroll_accepted}
   AND privileged = ${privileged}
-  order by code1C
   `)
-    const result2 = await request.query(`
+    let result2 = request.query(`
 select *
 from ic_admission_bachelors_vi
 where
@@ -309,10 +308,19 @@ AND is_doc_original = ${is_doc_original}
   AND dorm_required = ${dorm_required}
   AND enroll_accepted = ${enroll_accepted}
   AND privileged = ${privileged}
-  order by code1C
         `)
     const output1 = []
     let last = null
+    result1 = await result1
+    result1.recordset.sort((a, b) => {
+      if (a.code1C < b.code1C) {
+        return -1
+      }
+      if (a.code1C > b.code1C) {
+        return 1
+      }
+      return 0
+    })
     result1.recordset.reduce((acc, cur) => {
       if (acc.code1C !== cur.code1C) {
         output1.push(acc)
@@ -519,6 +527,16 @@ AND is_doc_original = ${is_doc_original}
     output1.shift()
     output1.push(last)
     const output2 = []
+    result2 = await result2
+    result2.recordset.sort((a, b) => {
+      if (a.code1C < b.code1C) {
+        return -1
+      }
+      if (a.code1C > b.code1C) {
+        return 1
+      }
+      return 0
+    })
     result2.recordset.reduce((acc, cur) => {
       if (acc.code1C !== cur.code1C) {
         output2.push(acc)
@@ -732,7 +750,7 @@ AND is_doc_original = ${is_doc_original}
     output3.push(...tmp)
     res.send(output3)
   } catch (e) {
-    console.error('UNIVERSITYPROF admission/spec_types error: ', e)
+    console.error('UNIVERSITYPROF admission/applicants error: ', e)
     res.sendStatus(400)
   }
 })
