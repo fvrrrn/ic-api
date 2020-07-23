@@ -4,8 +4,6 @@ const pool = require('../../../config/config_universityPROF').pool
 const poolConnection = require('../../../config/config_universityPROF')
   .poolConnection
 const { loggerPriem } = require('../../../lib/logger')
-const nodeCache = require('node-cache')
-const cache = new nodeCache()
 
 const getSpecialityInfo = (req, res, year) => {
   pool.connect((err) => {
@@ -247,17 +245,69 @@ router.route('/newSpecialities/people/:code').get((req, res, next) => {
   })
 })
 
-const getApplicants = async () => {
+router.route('/applicants').get(async (req, res, next) => {
+  let {
+    code1C = 'code1C',
+    is_doc_original = 'is_doc_original',
+    enroll_accepted = 'enroll_accepted',
+    dorm_required = 'dorm_required',
+    privileged = 'privileged',
+    spec_id = 'spec_id',
+    status_id = 'status_id',
+    subject_id = 'subject_id',
+    degree_type_id = 'degree_type_id',
+    admission_type_id = 'admission_type_id',
+    concurrency_type_id = 'concurrency_type_id',
+    sponsorship_type_id = 'sponsorship_type_id',
+  } = req.body
+  if (!(is_doc_original === 'is_doc_original')) {
+    is_doc_original = is_doc_original === 'true' ? 1 : 0
+  }
+  if (!(dorm_required === 'dorm_required')) {
+    dorm_required = dorm_required === 'true' ? 1 : 0
+  }
+  if (!(enroll_accepted === 'enroll_accepted')) {
+    enroll_accepted = enroll_accepted === 'true' ? 1 : 0
+  }
+  if (!(privileged === 'privileged')) {
+    privileged = privileged === 'true' ? 1 : 0
+  }
   await poolConnection
   try {
     const request = pool.request()
     let result1 = request.query(`
 select *
 from ic_admission_bachelors_ege
+where
+      code1C = ${code1C}
+  AND admission_type_id = ${admission_type_id}
+  AND concurrency_type_id = ${concurrency_type_id}
+  AND sponsorship_type_id = ${sponsorship_type_id}
+  AND degree_type_id = ${degree_type_id}
+  AND subject_id = ${subject_id}
+  AND spec_id = ${spec_id}
+  AND status_id = ${status_id}
+AND is_doc_original = ${is_doc_original}
+  AND dorm_required = ${dorm_required}
+  AND enroll_accepted = ${enroll_accepted}
+  AND privileged = ${privileged}
   `)
     let result2 = request.query(`
 select *
 from ic_admission_bachelors_vi
+where
+      code1C = ${code1C}
+  AND admission_type_id = ${admission_type_id}
+  AND concurrency_type_id = ${concurrency_type_id}
+  AND sponsorship_type_id = ${sponsorship_type_id}
+  AND degree_type_id = ${degree_type_id}
+  AND subject_id = ${subject_id}
+  AND spec_id = ${spec_id}
+  AND status_id = ${status_id}
+AND is_doc_original = ${is_doc_original}
+  AND dorm_required = ${dorm_required}
+  AND enroll_accepted = ${enroll_accepted}
+  AND privileged = ${privileged}
         `)
     const output1 = []
     let last = null
@@ -698,37 +748,11 @@ from ic_admission_bachelors_vi
       }
     }
     output3.push(...tmp)
-    return output3
+    res.send(output3)
   } catch (e) {
     console.error('UNIVERSITYPROF admission/applicants error: ', e)
-    return null
+    res.sendStatus(400)
   }
-}
-
-router.route('/applicants').get((req, res, next) => {
-  if (cache.get('applicants')) {
-    res.send(cache.get('applicants'))
-    return false
-  }
-  getApplicants()
-    .then((output) => {
-      cache.set('applicants', output, 3600000)
-      res.send(output)
-    })
-    .catch((err) => {
-      console.error(err)
-      res.sendStatus(400)
-    })
-})
-
-cache.on('expired', (key, value) => {
-  getApplicants()
-    .then((output) => {
-      cache.set('applicants', output, 3600000)
-    })
-    .catch((err) => {
-      console.error(err)
-    })
 })
 
 router.route('/concurrency_types').get(async (req, res, next) => {
