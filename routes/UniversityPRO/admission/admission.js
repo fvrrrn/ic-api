@@ -254,13 +254,16 @@ const getApplicants = async () => {
     const output1 = []
     const output2 = []
     const output3 = []
-    let last = null
+    let last1 = null
+    let last2 = null
+    let last3 = null
     const results = await Promise.all([
       request
         .query(
           `
 select *
 from ic_admission_bachelors_ege
+where code1C = 100102629
   `,
         )
         .then((result) =>
@@ -284,7 +287,6 @@ from ic_admission_bachelors_ege
                   patronymic: cur.patronymic,
                   extra_score: +cur.extra_score,
                   is_doc_original: !!cur.is_doc_original,
-                  enroll_accepted: !!cur.enroll_accepted,
                   privileged: !!cur.privileged,
                   dorm_required: !!cur.dorm_required,
                   date_applied: cur.date_applied,
@@ -302,6 +304,7 @@ from ic_admission_bachelors_ege
                     {
                       id: cur.spec_id,
                       name: cur.spec,
+                      enroll_accepted: !!cur.enroll_accepted,
                       concurrency_type: {
                         id: cur.concurrency_type_id,
                         name: cur.concurrency_type,
@@ -338,6 +341,7 @@ from ic_admission_bachelors_ege
                 acc.specs.push({
                   id: cur.spec_id,
                   name: cur.spec,
+                  enroll_accepted: !!cur.enroll_accepted,
                   concurrency_type: {
                     id: cur.concurrency_type_id,
                     name: cur.concurrency_type,
@@ -359,7 +363,7 @@ from ic_admission_bachelors_ege
                     name: cur.status,
                   },
                 })
-                last = acc
+                last1 = acc
                 return acc
               } else {
                 if (
@@ -368,6 +372,7 @@ from ic_admission_bachelors_ege
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -389,7 +394,7 @@ from ic_admission_bachelors_ege
                       name: cur.status,
                     },
                   })
-                  last = acc
+                  last1 = acc
                   return acc
                 }
                 if (
@@ -400,6 +405,7 @@ from ic_admission_bachelors_ege
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -421,7 +427,7 @@ from ic_admission_bachelors_ege
                       name: cur.status,
                     },
                   })
-                  last = acc
+                  last1 = acc
                   return acc
                 }
                 if (
@@ -432,6 +438,7 @@ from ic_admission_bachelors_ege
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -453,13 +460,14 @@ from ic_admission_bachelors_ege
                       name: cur.status,
                     },
                   })
-                  last = acc
+                  last1 = acc
                   return acc
                 }
                 if (!ss.some((s) => s.degree_type.id === cur.degree_type_id)) {
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -481,12 +489,12 @@ from ic_admission_bachelors_ege
                       name: cur.status,
                     },
                   })
-                  last = acc
+                  last1 = acc
                   return acc
                 }
               }
 
-              last = acc
+              last1 = acc
               return acc
             }, {}),
         ),
@@ -496,6 +504,7 @@ from ic_admission_bachelors_ege
           `
 select *
 from ic_admission_bachelors_vi
+where code1C = 100102629
         `,
         )
         .then((result) =>
@@ -519,7 +528,6 @@ from ic_admission_bachelors_vi
                   patronymic: cur.patronymic,
                   extra_score: +cur.extra_score,
                   is_doc_original: !!cur.is_doc_original,
-                  enroll_accepted: !!cur.enroll_accepted,
                   privileged: !!cur.privileged,
                   dorm_required: !!cur.dorm_required,
                   date_applied: cur.date_applied,
@@ -537,6 +545,7 @@ from ic_admission_bachelors_vi
                     {
                       id: cur.spec_id,
                       name: cur.spec,
+                      enroll_accepted: !!cur.enroll_accepted,
                       concurrency_type: {
                         id: cur.concurrency_type_id,
                         name: cur.concurrency_type,
@@ -573,6 +582,7 @@ from ic_admission_bachelors_vi
                 acc.specs.push({
                   id: cur.spec_id,
                   name: cur.spec,
+                  enroll_accepted: !!cur.enroll_accepted,
                   concurrency_type: {
                     id: cur.concurrency_type_id,
                     name: cur.concurrency_type,
@@ -601,6 +611,7 @@ from ic_admission_bachelors_vi
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -631,6 +642,7 @@ from ic_admission_bachelors_vi
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -661,6 +673,7 @@ from ic_admission_bachelors_vi
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -687,6 +700,7 @@ from ic_admission_bachelors_vi
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -711,7 +725,7 @@ from ic_admission_bachelors_vi
                 }
               }
 
-              last = acc
+              last2 = acc
               return acc
             }, {}),
         ),
@@ -721,6 +735,7 @@ from ic_admission_bachelors_vi
           `
 select *
 from ic_admission_bachelors_vi_not_passed_yet
+where code1C = 100102629
         `,
         )
         .then((result) =>
@@ -744,7 +759,6 @@ from ic_admission_bachelors_vi_not_passed_yet
                   patronymic: cur.patronymic,
                   extra_score: +cur.extra_score,
                   is_doc_original: !!cur.is_doc_original,
-                  enroll_accepted: !!cur.enroll_accepted,
                   privileged: !!cur.privileged,
                   dorm_required: !!cur.dorm_required,
                   date_applied: cur.date_applied,
@@ -762,6 +776,7 @@ from ic_admission_bachelors_vi_not_passed_yet
                     {
                       id: cur.spec_id,
                       name: cur.spec,
+                      enroll_accepted: !!cur.enroll_accepted,
                       concurrency_type: {
                         id: cur.concurrency_type_id,
                         name: cur.concurrency_type,
@@ -798,6 +813,7 @@ from ic_admission_bachelors_vi_not_passed_yet
                 acc.specs.push({
                   id: cur.spec_id,
                   name: cur.spec,
+                  enroll_accepted: !!cur.enroll_accepted,
                   concurrency_type: {
                     id: cur.concurrency_type_id,
                     name: cur.concurrency_type,
@@ -826,6 +842,7 @@ from ic_admission_bachelors_vi_not_passed_yet
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -856,6 +873,7 @@ from ic_admission_bachelors_vi_not_passed_yet
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -886,6 +904,7 @@ from ic_admission_bachelors_vi_not_passed_yet
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -912,6 +931,7 @@ from ic_admission_bachelors_vi_not_passed_yet
                   acc.specs.push({
                     id: cur.spec_id,
                     name: cur.spec,
+                    enroll_accepted: !!cur.enroll_accepted,
                     concurrency_type: {
                       id: cur.concurrency_type_id,
                       name: cur.concurrency_type,
@@ -936,17 +956,17 @@ from ic_admission_bachelors_vi_not_passed_yet
                 }
               }
 
-              last = acc
+              last3 = acc
               return acc
             }, {}),
         ),
     ])
     output1.shift()
-    output1.push(last)
+    if (last1) output1.push(last1)
     output2.shift()
-    output2.push(last)
+    if (last2) output2.push(last2)
     output3.shift()
-    output3.push(last)
+    if (last3) output3.push(last3)
     const output4 = []
     for (let o1 of output1) {
       const o = output2.find((o2) => o2.code1C === o1.code1C)
@@ -962,8 +982,13 @@ from ic_admission_bachelors_vi_not_passed_yet
         tmp.push(o2)
       }
     }
+    for (let o3 of output3) {
+      const o = output1.find((o1) => o1.code1C === o3.code1C)
+      if (!o) {
+        tmp.push(o3)
+      }
+    }
     output4.push(...tmp)
-    output4.push(...output3)
     return output4
   } catch (e) {
     console.error('UNIVERSITYPROF admission/applicants error: ', e)
