@@ -263,7 +263,6 @@ const getApplicants = async () => {
           `
 select *
 from ic_admission_bachelors_ege
-where code1C = 100102629
   `,
         )
         .then((result) =>
@@ -504,7 +503,6 @@ where code1C = 100102629
           `
 select *
 from ic_admission_bachelors_vi
-where code1C = 100102629
         `,
         )
         .then((result) =>
@@ -735,7 +733,6 @@ where code1C = 100102629
           `
 select *
 from ic_admission_bachelors_vi_not_passed_yet
-where code1C = 100102629
         `,
         )
         .then((result) =>
