@@ -5,8 +5,7 @@ const poolConnection = require('../../../config/config_universityPROF')
   .poolConnection
 const { loggerPriem } = require('../../../lib/logger')
 const nodeCache = require('node-cache')
-const cache = new nodeCache()
-let tmp = null
+const cache = new nodeCache({deleteOnExpire: false})
 
 const getSpecialityInfo = (req, res, year) => {
   pool.connect((err) => {
@@ -993,27 +992,6 @@ from ic_admission_bachelors_vi_not_passed_yet
     return null
   }
 }
-
-const updateApplicants = () => {
-  getApplicants()
-    .then((output) => {
-      tmp = output
-    })
-    .catch((err) => {
-      console.error(err)
-    })
-}
-
-setTimeout(updateApplicants, 3600000)
-
-router.route('/test').get((req, res, next) => {
-  if (!tmp) {
-    updateApplicants()
-    res.send(tmp)
-  } else {
-    res.send(tmp)
-  }
-})
 
 router.route('/applicants').get((req, res, next) => {
   if (cache.get('applicants')) {
