@@ -996,23 +996,13 @@ from ic_admission_bachelors_vi_not_passed_yet
 router.route('/applicants').get((req, res, next) => {
   req.setTimeout(300000)
   if (cache.get('applicants')) {
-    res.setHeader('Content-Type', 'application/json; charset=utf-8')
-    res.setHeader('Transfer-Encoding', 'chunked')
-    for (const a of cache.get('applicants')) {
-      res.write(JSON.stringify(a))
-    }
-    res.end()
+    res.send(cache.get('applicants'))
     return false
   }
   getApplicants()
     .then((output) => {
       cache.set('applicants', output, 360)
-      res.setHeader('Content-Type', 'application/json; charset=utf-8')
-      res.setHeader('Transfer-Encoding', 'chunked')
-      for (const a of output) {
-        res.write(JSON.stringify(a))
-      }
-      res.end()
+      res.send(output)
     })
     .catch((err) => {
       console.error(err)
