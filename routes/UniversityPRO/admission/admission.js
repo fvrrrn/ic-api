@@ -5,7 +5,7 @@ const poolConnection = require('../../../config/config_universityPROF')
   .poolConnection
 const { loggerPriem } = require('../../../lib/logger')
 const nodeCache = require('node-cache')
-const cache = new nodeCache({deleteOnExpire: false})
+const cache = new nodeCache({ deleteOnExpire: false })
 
 const getSpecialityInfo = (req, res, year) => {
   pool.connect((err) => {
@@ -994,6 +994,7 @@ from ic_admission_bachelors_vi_not_passed_yet
 }
 
 router.route('/applicants').get((req, res, next) => {
+  req.setTimeout(300000)
   if (cache.get('applicants')) {
     res.send(cache.get('applicants'))
     return false
@@ -1019,7 +1020,7 @@ cache.on('expired', (key, value) => {
     })
 })
 
-router.route('/concurrency_types').get(async (req, res, next) => {
+const getConcurrencyTypes = async () => {
   await poolConnection
   try {
     const result = await pool.request().query(`
@@ -1084,11 +1085,27 @@ order by concurrency_type_id
     }, {})
     output.shift()
     output.push(last)
-    res.send(output)
+    return output
   } catch (err) {
     console.error('UNIVERSITYPROF admission/concurrency_types error: ', err)
-    res.sendStatus(400)
+    return null
   }
+}
+
+router.route('/concurrency_types').get(async (req, res, next) => {
+  if (cache.get('concurrency_types')) {
+    res.send(cache.get('concurrency_types'))
+    return false
+  }
+  getConcurrencyTypes()
+    .then((output) => {
+      cache.set('concurrency_types', output, 3600)
+      res.send(output)
+    })
+    .catch((err) => {
+      console.error(err)
+      res.sendStatus(400)
+    })
 })
 
 router.route('/spec_types').get(async (req, res, next) => {
