@@ -986,7 +986,9 @@ from ic_admission_bachelors_vi_not_passed_yet
       }
     }
     output4.push(...tmp)
-    return output4
+    return output4.map((v) => ({ ...v, update_time: `${new Date(Date.now()).getHours()}:${new Date(
+        Date.now(),
+      ).getMinutes()}:${new Date(Date.now()).getSeconds()}` }))
   } catch (e) {
     console.error('UNIVERSITYPROF admission/applicants error: ', e)
     return null
