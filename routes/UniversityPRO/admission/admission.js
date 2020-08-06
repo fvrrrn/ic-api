@@ -986,9 +986,12 @@ from ic_admission_bachelors_vi_not_passed_yet
       }
     }
     output4.push(...tmp)
-    return output4.map((v) => ({ ...v, update_time: `${new Date(Date.now()).getHours()}:${new Date(
+    return output4.map((v) => ({
+      ...v,
+      update_time: `${new Date(Date.now()).getHours()}:${new Date(
         Date.now(),
-      ).getMinutes()}:${new Date(Date.now()).getSeconds()}` }))
+      ).getMinutes()}:${new Date(Date.now()).getSeconds()}`,
+    }))
   } catch (e) {
     console.error('UNIVERSITYPROF admission/applicants error: ', e)
     return null
@@ -1010,6 +1013,242 @@ router.route('/applicants').get((req, res, next) => {
       console.error(err)
       res.sendStatus(400)
     })
+})
+
+router.route('/masters').get(async (req, res, next) => {
+  await poolConnection
+  try {
+    const result = await pool
+      .request()
+      .query(`select * from ic_admission_masters`)
+    const output3 = []
+    let last3 = null
+    result.recordset
+      .sort((a, b) => {
+        if (a.code1C < b.code1C) {
+          return -1
+        }
+        if (a.code1C > b.code1C) {
+          return 1
+        }
+        return 0
+      })
+      .reduce((acc, cur) => {
+        if (acc.code1C !== cur.code1C) {
+          output3.push(acc)
+          return {
+            code1C: cur.code1C,
+            surname: cur.surname,
+            name: cur.name,
+            patronymic: cur.patronymic,
+            extra_score: +cur.extra_score,
+            is_doc_original: !!cur.is_doc_original,
+            privileged: !!cur.privileged,
+            dorm_required: !!cur.dorm_required,
+            date_applied: cur.date_applied,
+            exams: {
+              ege: [],
+              vi: [
+                {
+                  id: cur.subject_id,
+                  name: cur.subject,
+                  score: +cur.score,
+                },
+              ],
+            },
+            specs: [
+              {
+                id: cur.spec_id,
+                name: cur.spec,
+                enroll_accepted: !!cur.enroll_accepted,
+                concurrency_type: {
+                  id: cur.concurrency_type_id,
+                  name: cur.concurrency_type,
+                },
+                sponsorship_type: {
+                  id: cur.sponsorship_type_id,
+                  name: cur.sponsorship_type,
+                },
+                admission_type: {
+                  id: cur.admission_type_id,
+                  name: cur.admission_type,
+                },
+                degree_type: {
+                  id: cur.degree_type_id,
+                  name: cur.degree_type,
+                },
+                status: {
+                  id: cur.status_id,
+                  name: cur.status,
+                },
+              },
+            ],
+          }
+        }
+        if (!acc.exams.vi.find((e) => e.id === cur.subject_id)) {
+          acc.exams.vi.push({
+            id: cur.subject_id,
+            name: cur.subject,
+            score: +cur.score,
+          })
+        }
+        const ss = acc.specs.filter((s) => s.id === cur.spec_id)
+        if (!ss.length) {
+          acc.specs.push({
+            id: cur.spec_id,
+            name: cur.spec,
+            enroll_accepted: !!cur.enroll_accepted,
+            concurrency_type: {
+              id: cur.concurrency_type_id,
+              name: cur.concurrency_type,
+            },
+            sponsorship_type: {
+              id: cur.sponsorship_type_id,
+              name: cur.sponsorship_type,
+            },
+            admission_type: {
+              id: cur.admission_type_id,
+              name: cur.admission_type,
+            },
+            degree_type: {
+              id: cur.degree_type_id,
+              name: cur.degree_type,
+            },
+            status: {
+              id: cur.status_id,
+              name: cur.status,
+            },
+          })
+        } else {
+          if (!ss.some((s) => s.admission_type.id === cur.admission_type_id)) {
+            acc.specs.push({
+              id: cur.spec_id,
+              name: cur.spec,
+              enroll_accepted: !!cur.enroll_accepted,
+              concurrency_type: {
+                id: cur.concurrency_type_id,
+                name: cur.concurrency_type,
+              },
+              sponsorship_type: {
+                id: cur.sponsorship_type_id,
+                name: cur.sponsorship_type,
+              },
+              admission_type: {
+                id: cur.admission_type_id,
+                name: cur.admission_type,
+              },
+              degree_type: {
+                id: cur.degree_type_id,
+                name: cur.degree_type,
+              },
+              status: {
+                id: cur.status_id,
+                name: cur.status,
+              },
+            })
+          }
+          if (
+            !ss.some((s) => s.concurrency_type.id === cur.concurrency_type_id)
+          ) {
+            acc.specs.push({
+              id: cur.spec_id,
+              name: cur.spec,
+              enroll_accepted: !!cur.enroll_accepted,
+              concurrency_type: {
+                id: cur.concurrency_type_id,
+                name: cur.concurrency_type,
+              },
+              sponsorship_type: {
+                id: cur.sponsorship_type_id,
+                name: cur.sponsorship_type,
+              },
+              admission_type: {
+                id: cur.admission_type_id,
+                name: cur.admission_type,
+              },
+              degree_type: {
+                id: cur.degree_type_id,
+                name: cur.degree_type,
+              },
+              status: {
+                id: cur.status_id,
+                name: cur.status,
+              },
+            })
+          }
+          if (
+            !ss.some((s) => s.sponsorship_type.id === cur.sponsorship_type_id)
+          ) {
+            acc.specs.push({
+              id: cur.spec_id,
+              name: cur.spec,
+              enroll_accepted: !!cur.enroll_accepted,
+              concurrency_type: {
+                id: cur.concurrency_type_id,
+                name: cur.concurrency_type,
+              },
+              sponsorship_type: {
+                id: cur.sponsorship_type_id,
+                name: cur.sponsorship_type,
+              },
+              admission_type: {
+                id: cur.admission_type_id,
+                name: cur.admission_type,
+              },
+              degree_type: {
+                id: cur.degree_type_id,
+                name: cur.degree_type,
+              },
+              status: {
+                id: cur.status_id,
+                name: cur.status,
+              },
+            })
+          }
+          if (!ss.some((s) => s.degree_type.id === cur.degree_type_id)) {
+            acc.specs.push({
+              id: cur.spec_id,
+              name: cur.spec,
+              enroll_accepted: !!cur.enroll_accepted,
+              concurrency_type: {
+                id: cur.concurrency_type_id,
+                name: cur.concurrency_type,
+              },
+              sponsorship_type: {
+                id: cur.sponsorship_type_id,
+                name: cur.sponsorship_type,
+              },
+              admission_type: {
+                id: cur.admission_type_id,
+                name: cur.admission_type,
+              },
+              degree_type: {
+                id: cur.degree_type_id,
+                name: cur.degree_type,
+              },
+              status: {
+                id: cur.status_id,
+                name: cur.status,
+              },
+            })
+          }
+        }
+
+        last3 = acc
+        return acc
+      }, {})
+    output3.shift()
+    if (last3) output3.push(last3)
+    res.send(output3.map((v) => ({
+      ...v,
+      update_time: `${new Date(Date.now()).getHours()}:${new Date(
+        Date.now(),
+      ).getMinutes()}:${new Date(Date.now()).getSeconds()}`,
+    })))
+  } catch (err) {
+    console.error('UNIVERSITYPROF admission/sponsorship_types error: ', err)
+    res.sendStatus(400)
+  }
 })
 
 cache.on('expired', (key, value) => {
