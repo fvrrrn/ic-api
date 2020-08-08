@@ -986,11 +986,12 @@ from ic_admission_bachelors_vi_not_passed_yet
       }
     }
     output4.push(...tmp)
+    const update_time = `${new Date(Date.now()).getHours()}:${new Date(
+      Date.now(),
+    ).getMinutes()}:${new Date(Date.now()).getSeconds()}`
     return output4.map((v) => ({
       ...v,
-      update_time: `${new Date(Date.now()).getHours()}:${new Date(
-        Date.now(),
-      ).getMinutes()}:${new Date(Date.now()).getSeconds()}`,
+      update_time: update_time,
     }))
   } catch (e) {
     console.error('UNIVERSITYPROF admission/applicants error: ', e)
@@ -1239,12 +1240,14 @@ router.route('/masters').get(async (req, res, next) => {
       }, {})
     output3.shift()
     if (last3) output3.push(last3)
-    res.send(output3.map((v) => ({
-      ...v,
-      update_time: `${new Date(Date.now()).getHours()}:${new Date(
-        Date.now(),
-      ).getMinutes()}:${new Date(Date.now()).getSeconds()}`,
-    })))
+    res.send(
+      output3.map((v) => ({
+        ...v,
+        update_time: `${new Date(Date.now()).getHours()}:${new Date(
+          Date.now(),
+        ).getMinutes()}:${new Date(Date.now()).getSeconds()}`,
+      })),
+    )
   } catch (err) {
     console.error('UNIVERSITYPROF admission/sponsorship_types error: ', err)
     res.sendStatus(400)
