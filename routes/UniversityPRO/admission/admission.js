@@ -1007,7 +1007,7 @@ router.route('/applicants').get((req, res, next) => {
   }
   getApplicants()
     .then((output) => {
-      cache.set('applicants', output, 360)
+      cache.set('applicants', output, 3600)
       res.send(output)
     })
     .catch((err) => {
