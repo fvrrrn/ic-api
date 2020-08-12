@@ -1257,7 +1257,7 @@ router.route('/masters').get(async (req, res, next) => {
 cache.on('expired', (key, value) => {
   getApplicants()
     .then((output) => {
-      cache.set('applicants', output, 360)
+      cache.set('applicants', output, 3600)
     })
     .catch((err) => {
       console.error(err)
