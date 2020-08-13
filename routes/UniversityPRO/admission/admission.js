@@ -5,7 +5,8 @@ const poolConnection = require('../../../config/config_universityPROF')
   .poolConnection
 const { loggerPriem } = require('../../../lib/logger')
 const nodeCache = require('node-cache')
-const cache = new nodeCache({ deleteOnExpire: false })
+const cache = new nodeCache()
+const fs = require('fs')
 
 const getSpecialityInfo = (req, res, year) => {
   pool.connect((err) => {
@@ -964,7 +965,7 @@ from ic_admission_bachelors_vi_not_passed_yet
     if (last2) output2.push(last2)
     output3.shift()
     if (last3) output3.push(last3)
-    const output4 = []
+    let output4 = []
     for (let o1 of output1) {
       const o = output2.find((o2) => o2.code1C === o1.code1C)
       if (o) {
@@ -989,10 +990,17 @@ from ic_admission_bachelors_vi_not_passed_yet
     const update_time = `${new Date(Date.now()).getHours()}:${new Date(
       Date.now(),
     ).getMinutes()}:${new Date(Date.now()).getSeconds()}`
-    return output4.map((v) => ({
+    output4 = output4.map((v) => ({
       ...v,
       update_time: update_time,
     }))
+    fs.writeFile(
+      __dirname + '\\applicants.json',
+      JSON.stringify(output4),
+      (err) => {
+        if (err) console.log(err)
+      },
+    )
   } catch (e) {
     console.error('UNIVERSITYPROF admission/applicants error: ', e)
     return null
@@ -1000,20 +1008,10 @@ from ic_admission_bachelors_vi_not_passed_yet
 }
 
 router.route('/applicants').get((req, res, next) => {
-  req.setTimeout(300000)
-  if (cache.get('applicants')) {
-    res.send(cache.get('applicants'))
-    return false
-  }
-  getApplicants()
-    .then((output) => {
-      cache.set('applicants', output, 3600)
-      res.send(output)
-    })
-    .catch((err) => {
-      console.error(err)
-      res.sendStatus(400)
-    })
+  res.writeHead(200, {
+    'Content-Type': 'application/json',
+  })
+  fs.createReadStream(__dirname + '\\applicants.json').pipe(res)
 })
 
 router.route('/masters').get(async (req, res, next) => {
@@ -1254,15 +1252,9 @@ router.route('/masters').get(async (req, res, next) => {
   }
 })
 
-cache.on('expired', (key, value) => {
+setTimeout(() => {
   getApplicants()
-    .then((output) => {
-      cache.set('applicants', output, 3600)
-    })
-    .catch((err) => {
-      console.error(err)
-    })
-})
+}, 3.6e6)
 
 const getConcurrencyTypes = async () => {
   await poolConnection
@@ -1343,7 +1335,7 @@ router.route('/concurrency_types').get(async (req, res, next) => {
   }
   getConcurrencyTypes()
     .then((output) => {
-      cache.set('concurrency_types', output, 3600)
+      cache.set('concurrency_types', output, 36000)
       res.send(output)
     })
     .catch((err) => {
