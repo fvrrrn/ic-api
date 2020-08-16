@@ -1,7 +1,7 @@
 {
-  "name": "1capi",
+  "name": "ic-api",
   "version": "1.0.0",
-  "description": "1capi",
+  "description": "ic-api",
   "main": "index.js",
   "scripts": {
     "start": "nodemon ./index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Grezer/1capi.git"
+    "url": "git+https://github.com/fvrrrn/ic-api.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Grezer/1capi/issues"
+    "url": "https://github.com/fvrrrn/ic-api/issues"
   },
-  "homepage": "https://github.com/Grezer/1capi#readme",
+  "homepage": "https://github.com/fvrrrn/ic-api#readme",
   "dependencies": {
     "ba64": "^3.0.9",
     "body-parser": "^1.19.0",
