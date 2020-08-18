@@ -1,16 +1,15 @@
-require('dotenv').config()
-const express = require('express')
+import { config } from 'dotenv'
+
+config()
+import express from 'express'
 const router = express.Router()
-const errorhandler = require('errorhandler')
-const https = require('https')
-const helmet = require('helmet')
-const cors = require('cors')
-const fs = require('fs')
-const { logger } = require('./lib/logger')
-const bodyParser = require('body-parser')
+import errorhandler from 'errorhandler'
+import cors from 'cors'
+import { logger } from './lib/logger'
+
+import bodyParser from 'body-parser'
 
 const app = express()
-app.use(helmet())
 app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
