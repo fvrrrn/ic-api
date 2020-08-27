@@ -3,7 +3,7 @@ name: default
 
 steps:
   - name: test
-    image: node:10-alpine
+    image: node
     commands:
       - npm install
       # - npm run test
@@ -43,9 +43,9 @@ steps:
       - DB_DATABASE_PROF
       - PORT
     commands:
-      - docker container stop schedule_service || true && docker rm schedule_service || true
-      - docker build -t nick/schedule_service .
-      - docker run -v /home/schedule_service_logs:/home/node/schedule_service/logs -v /home/ssl:/home/node/schedule_service/ssl -e NODE_ENV=$NODE_ENV -e DB_USER=$DB_USER -e DB_PASS=$DB_PASS -e DB_SERVER=$DB_SERVER -e DB_DATABASE=$DB_DATABASE -e DB_DATABASE_PROF=$DB_DATABASE_PROF -e PORT=$PORT -p 8447:3000 -d --name=schedule_service nick/schedule_service
+      - docker container stop ic-api || true && docker rm ic-api || true
+      - docker build -t fvrrrn/ic-api .
+      - docker run -v /home/ic-api_logs:/home/node/ic-api/logs -v /home/ssl:/home/node/ic-api/ssl -e NODE_ENV=$NODE_ENV -e DB_USER=$DB_USER -e DB_PASS=$DB_PASS -e DB_SERVER=$DB_SERVER -e DB_DATABASE=$DB_DATABASE -e DB_DATABASE_PROF=$DB_DATABASE_PROF -e PORT=$PORT -p 8447:3000 -d --name=ic-api fvrrrn/ic-api
 
   - name: telegram
     image: appleboy/drone-telegram:latest
