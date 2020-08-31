@@ -8,7 +8,8 @@ export default (app: Router) => {
 
   route.get('/teachers', async (req: Request, res: Response) => {
     try {
-      if (req.body.snp) throw 'req.body.snp is undefined, no snp provided.'
+      if (req.body.snp)
+        throw new Error('req.body.snp is undefined, no snp provided.')
       const result = await mssql.pool1.request().query(
         `select day_number day,
             case
@@ -21,29 +22,29 @@ export default (app: Router) => {
                       when lesson like '6%' then 6
                       when lesson like '7%' then 7
                       when lesson like '8%' then 8
-                  end lesson_number, cabinet, cabinet_type, lecturer, _group, _subject_type, _subject, period
+                  end lesson_number, cabinet, cabinetType, lecturer, _group, _subjectType, _subject, period
           from аср_расписание
           where lecturer like '%${req.body.snp}%' and datepart(year, dateadd(year, -2000, start)) = datepart(year, getdate())
           order by day_number, lesson
         `,
       )
-      let getSchedule = result.recordset
+      const getSchedule = result.recordset
 
-      let schedule = []
+      const schedule = []
       for (let i = 0; i < result.recordset.length; i++) {
-        let day = getSchedule[i].day
+        const day = getSchedule[i].day
 
-        let lessons = []
+        const lessons = []
         while (true) {
           const lesson = getSchedule[i].lesson_number
           const cabinet = getSchedule[i].cabinet
-          const cabinet_type = getSchedule[i].cabinet_type
+          const cabinetType = getSchedule[i].cabinetType
           const lecturer = getSchedule[i].lecturer
-          const subject_type = getSchedule[i]._subject_type
-          let subjects = []
+          const subjectType = getSchedule[i]._subjectType
+          const subjects = []
           while (true) {
             const subject = getSchedule[i]._subject
-            let groups = []
+            const groups = []
             while (true) {
               groups.push(getSchedule[i]._group)
               if (getSchedule.length - 1 === i) break
@@ -66,19 +67,19 @@ export default (app: Router) => {
               break
           }
           lessons.push({
-            lesson: lesson,
-            cabinet: cabinet,
-            cabinet_type: cabinet_type,
-            lecturer: lecturer,
-            subject_type: subject_type,
-            subjects: subjects,
+            lesson,
+            cabinet,
+            cabinetType,
+            lecturer,
+            subjectType,
+            subjects,
           })
           if (getSchedule.length - 1 === i) break
           if (getSchedule[i + 1].day !== day) break
           else i++
         }
         schedule.push({
-          day: day,
+          day,
           lessons,
         })
       }
@@ -92,7 +93,9 @@ export default (app: Router) => {
   route.get('/teachers', async (req: Request, res: Response) => {
     try {
       if (req.body.group_number)
-        throw 'req.body.group_number is undefined, no group_number provided.'
+        throw new Error(
+          'req.body.group_number is undefined, no group_number provided.',
+        )
       const result = await mssql.pool1.request().query(
         `select day_number day,
           case
@@ -105,29 +108,29 @@ export default (app: Router) => {
                     when lesson like '6%' then 6
                     when lesson like '7%' then 7
                     when lesson like '8%' then 8
-                end lesson_number, cabinet, cabinet_type, lecturer, _group, _subject_type, _subject, period
+                end lesson_number, cabinet, cabinetType, lecturer, _group, _subjectType, _subject, period
         from аср_расписание
         where _group like '%${req.body.group_number}%' and datepart(year, dateadd(year, -2000, start)) = datepart(year, getdate())
         order by day_number, lesson
       `,
       )
-      let getSchedule = result.recordset
+      const getSchedule = result.recordset
 
-      let schedule = []
+      const schedule = []
       for (let i = 0; i < result.recordset.length; i++) {
-        let day = getSchedule[i].day
+        const day = getSchedule[i].day
 
-        let lessons = []
+        const lessons = []
         while (true) {
           const lesson = getSchedule[i].lesson_number
           const cabinet = getSchedule[i].cabinet
-          const cabinet_type = getSchedule[i].cabinet_type
+          const cabinetType = getSchedule[i].cabinetType
           const lecturer = getSchedule[i].lecturer
-          const subject_type = getSchedule[i]._subject_type
-          let subjects = []
+          const subjectType = getSchedule[i]._subjectType
+          const subjects = []
           while (true) {
             const subject = getSchedule[i]._subject
-            let groups = []
+            const groups = []
             while (true) {
               groups.push(getSchedule[i]._group)
               if (getSchedule.length - 1 === i) break
@@ -151,19 +154,19 @@ export default (app: Router) => {
             if (getSchedule[i + 1].day !== day) break
           }
           lessons.push({
-            lesson: lesson,
-            cabinet: cabinet,
-            cabinet_type: cabinet_type,
-            lecturer: lecturer,
-            subject_type: subject_type,
-            subjects: subjects,
+            lesson,
+            cabinet,
+            cabinetType,
+            lecturer,
+            subjectType,
+            subjects,
           })
           if (getSchedule.length - 1 === i) break
           if (getSchedule[i + 1].day !== day) break
           else i++
         }
         schedule.push({
-          day: day,
+          day,
           lessons,
         })
       }

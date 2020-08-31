@@ -2,7 +2,7 @@
   "name": "ic-api",
   "version": "1.0.0",
   "description": "ic-api",
-  "main": "dist/app.js",
+  "main": "dist/index.js",
   "scripts": {
     "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",

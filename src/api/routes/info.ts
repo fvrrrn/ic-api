@@ -7,7 +7,7 @@ export default (app: Router) => {
   app.use('/info', route)
 
   route.get('/teachers', async (req: Request, res: Response) => {
-    let { code1C = 'code1C', snp = 'snp' } = req.body
+    const { code1C = 'code1C', snp = 'snp' } = req.body
     try {
       const result = await mssql.pool1.request().query(
         `select top(1000) *
@@ -22,7 +22,7 @@ export default (app: Router) => {
   })
 
   route.get('/students', async (req: Request, res: Response) => {
-    let { code1C = 'Код_Студента', snp = 'Наименование' } = req.body
+    const { code1C = 'Код_Студента', snp = 'Наименование' } = req.body
     try {
       const result = await mssql.pool1.request().query(
         `select top(1000)
@@ -82,7 +82,7 @@ export default (app: Router) => {
         `
 SELECT distinct [Caf], [Group]
       FROM (
-		Select Case 
+		Select Case
 			when [Facutet] is null THEN 'Не указана'
 			ELSE [Facutet]
 			END as [Caf], [_Group] as [Group]
@@ -92,15 +92,15 @@ SELECT distinct [Caf], [Group]
 	order by [Caf], [Group]
 `,
       )
-      let getGroups = result.recordset
+      const getGroups = result.recordset
 
-      let groupsAll = []
+      const groupsAll = []
       for (let i = 0; i < getGroups.length; i++) {
-        let caf = []
-        let cafNow = getGroups[i].Caf
+        const caf = []
+        const cafNow = getGroups[i].Caf
         while (true) {
-          let course = getGroups[i].Group.slice(0, 1)
-          let groups = []
+          const course = getGroups[i].Group.slice(0, 1)
+          const groups = []
           while (true) {
             groups.push({
               group: getGroups[i].Group,
@@ -133,7 +133,7 @@ SELECT distinct [Caf], [Group]
   })
 
   route.get('/groups', async (req: Request, res: Response) => {
-    let { group_number = 'Группа' } = req.body
+    const { group_number = 'Группа' } = req.body
     try {
       const result = await mssql.pool1.request().query(
         `SELECT top(2000) [Код] as code_1c
@@ -169,7 +169,7 @@ SELECT distinct [Caf], [Group]
   })
 
   route.get('/snp_to_code/:snp', async (req: Request, res: Response) => {
-    let { snp = 'snp' } = req.params
+    const { snp = 'snp' } = req.params
     try {
       const result = await mssql.pool1.request().query(
         `SELECT *

@@ -25,11 +25,6 @@ export default ({ app }: { app: express.Application }) => {
   // Enable Cross Origin Resource Sharing to all origins by default
   app.use(cors())
 
-  // Some sauce that always add since 2014
-  // "Lets you use HTTP verbs such as PUT or DELETE in places where the client doesn't support it."
-  // Maybe not needed anymore ?
-  app.use(require('method-override')())
-
   // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.json())
   // Load API routes
@@ -43,7 +38,8 @@ export default ({ app }: { app: express.Application }) => {
   /// catch 404 and forward to error handler
   app.use((req, res, next) => {
     const err = new Error('Not Found')
-    err['status'] = 404
+    // TODO: написать интерфейс для ошибки? или просто забить?
+    // err.status = 404
     next(err)
   })
 

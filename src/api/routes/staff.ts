@@ -7,7 +7,7 @@ export default (app: Router) => {
   app.use('/staff', route)
 
   route.get('/', async (req: Request, res: Response) => {
-    let { code1C = 'code1C', snp = 'snp' } = req.body
+    const { code1C = 'code1C', snp = 'snp' } = req.body
     try {
       const result = await mssql.pool2.request().query(
         `select код, наименование, датарождения

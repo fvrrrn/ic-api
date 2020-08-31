@@ -735,7 +735,7 @@ export default (app: Router) => {
       output3.shift()
       if (last3) output3.push(last3)
       let applicants = []
-      for (let o1 of output1) {
+      for (const o1 of output1) {
         const o = output2.find((o2) => o2.code1C === o1.code1C)
         if (o) {
           o1.exams.vi = o.exams.vi
@@ -743,25 +743,25 @@ export default (app: Router) => {
         applicants.push(o1)
       }
       const tmp = []
-      for (let o2 of output2) {
+      for (const o2 of output2) {
         const o = output1.find((o1) => o1.code1C === o2.code1C)
         if (!o) {
           tmp.push(o2)
         }
       }
-      for (let o3 of output3) {
+      for (const o3 of output3) {
         const o = output1.find((o1) => o1.code1C === o3.code1C)
         if (!o) {
           tmp.push(o3)
         }
       }
       applicants.push(...tmp)
-      const update_time = `${new Date(Date.now()).getHours()}:${new Date(
+      const updateTime = `${new Date(Date.now()).getHours()}:${new Date(
         Date.now(),
       ).getMinutes()}:${new Date(Date.now()).getSeconds()}`
       applicants = applicants.map((v) => ({
         ...v,
-        update_time: update_time,
+        update_time: updateTime,
       }))
 
       res.status(200)
@@ -1099,9 +1099,9 @@ export default (app: Router) => {
         .query(
           `SELECT DISTINCT Код id, Наименование name FROM Справочник_Специальности`,
         )
-      res.send(result.recordset)
+      res.send(result.recordset).status(200)
     } catch (error) {
-      console.error('UNIVERSITYPROF admission/spec_types error: ', error)
+      LoggerInstance.error('UNIVERSITYPROF admission/spec_types error: ', error)
       res.sendStatus(500)
     }
   })
@@ -1113,9 +1113,9 @@ export default (app: Router) => {
         .query(
           `SELECT Код id, Наименование name FROM Справочник_ОснованияПоступления`,
         )
-      res.send(result.recordset)
+      res.send(result.recordset).status(200)
     } catch (error) {
-      console.error('admission/sponsorship_types error: ', error)
+      LoggerInstance.error('admission/sponsorship_types error: ', error)
       res.sendStatus(500)
     }
   })
@@ -1127,7 +1127,7 @@ export default (app: Router) => {
         .query(
           `SELECT Код id, Наименование name FROM Справочник_Категорииприема`,
         )
-      res.send(result.recordset)
+      res.send(result.recordset).status(200)
     } catch (error) {
       LoggerInstance.error('admission/admission_types error: ', error)
       res.sendStatus(500)
