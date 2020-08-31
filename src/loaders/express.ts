@@ -1,9 +1,9 @@
 import express from 'express'
-const { Request, Response, NextFunction, ErrorRequestHandler } = express
 import bodyParser from 'body-parser'
 import cors from 'cors'
+import helmet from 'helmet'
 import routes from '../api'
-import config from '../config'
+
 export default ({ app }: { app: express.Application }) => {
   /**
    * Health Check endpoints
@@ -33,8 +33,13 @@ export default ({ app }: { app: express.Application }) => {
   // Middleware that transforms the raw string of req.body into json
   app.use(bodyParser.json())
   // Load API routes
-  app.use(config.api.prefix, routes())
-
+  app.use(routes())
+  //   XSS Protection
+  // Prevent Clickingjacking using X-Frame-Options
+  // Enforcing all connections to be HTTPS
+  // Setting a Context-Security-Policy header
+  // Disabling the X-Powered-By header so attackers can’t narrow down their attacks to specific software
+  app.use(helmet())
   /// catch 404 and forward to error handler
   app.use((req, res, next) => {
     const err = new Error('Not Found')
