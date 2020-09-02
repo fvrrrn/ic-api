@@ -10,10 +10,14 @@ const route = express_1.Router();
 exports.default = (app) => {
     app.use('/schedule', route);
     route.get('/teachers', async (req, res) => {
+        const { snp } = req.body;
         try {
-            if (req.body.snp)
+            if (!snp)
                 throw new Error('req.body.snp is undefined, no snp provided.');
-            const result = await mssql_1.default.pool1.request().query(`select day_number day,
+            const result = await mssql_1.default.pool1
+                .request()
+                .input('snp', mssql_1.default.types.NVarChar, `%${snp}%`)
+                .query(`select day_number day,
             case
                       when lesson like '0%' then 0
                       when lesson like '1%' then 1
@@ -24,9 +28,9 @@ exports.default = (app) => {
                       when lesson like '6%' then 6
                       when lesson like '7%' then 7
                       when lesson like '8%' then 8
-                  end lesson_number, cabinet, cabinetType, lecturer, _group, _subjectType, _subject, period
+                  end lesson_number, cabinet, cabinet_Type, lecturer, _group, _subject_Type, _subject, period
           from аср_расписание
-          where lecturer like '%${req.body.snp}%' and datepart(year, dateadd(year, -2000, start)) = datepart(year, getdate())
+          where lecturer like isnull(@snp, lecturer) and datepart(year, dateadd(year, -2000, start)) = datepart(year, getdate())
           order by day_number, lesson
         `);
             const getSchedule = result.recordset;
@@ -88,15 +92,19 @@ exports.default = (app) => {
             res.send(schedule);
         }
         catch (error) {
-            logger_1.default.error('schedule/teachers', error);
+            logger_1.default.error('schedule/teachers error: ', error);
             res.sendStatus(500);
         }
     });
-    route.get('/teachers', async (req, res) => {
+    route.get('/students', async (req, res) => {
+        const { group_number } = req.body;
         try {
-            if (req.body.group_number)
+            if (!group_number)
                 throw new Error('req.body.group_number is undefined, no group_number provided.');
-            const result = await mssql_1.default.pool1.request().query(`select day_number day,
+            const result = await mssql_1.default.pool1
+                .request()
+                .input('group_number', mssql_1.default.types.Int, group_number)
+                .query(`select day_number day,
           case
                     when lesson like '0%' then 0
                     when lesson like '1%' then 1
@@ -109,7 +117,7 @@ exports.default = (app) => {
                     when lesson like '8%' then 8
                 end lesson_number, cabinet, cabinetType, lecturer, _group, _subjectType, _subject, period
         from аср_расписание
-        where _group like '%${req.body.group_number}%' and datepart(year, dateadd(year, -2000, start)) = datepart(year, getdate())
+        where _group like isnull(@group_number, _group) and datepart(year, dateadd(year, -2000, start)) = datepart(year, getdate())
         order by day_number, lesson
       `);
             const getSchedule = result.recordset;

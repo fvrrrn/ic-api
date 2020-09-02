@@ -26,6 +26,7 @@ exports.default = ({ app }) => {
     // Enable Cross Origin Resource Sharing to all origins by default
     app.use(cors_1.default());
     // Middleware that transforms the raw string of req.body into json
+    app.use(body_parser_1.default.urlencoded({ extended: false }));
     app.use(body_parser_1.default.json());
     // Load API routes
     app.use(api_1.default());

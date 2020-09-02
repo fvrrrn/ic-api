@@ -12,9 +12,15 @@ exports.default = (app) => {
     route.get('/', async (req, res) => {
         const { code1C = 'code1C', snp = 'snp' } = req.body;
         try {
-            const result = await mssql_1.default.pool2.request().query(`select код, наименование, датарождения
+            const result = await mssql_1.default.pool2
+                .request()
+                .input('snp', mssql_1.default.types.NVarChar, `%${snp}%`)
+                .query(`select Фамилия surname,
+          Имя name,
+          Отчество patronymic,
+          ДатаРождения birth_date,
         from kadry1c.dbo.справочник_физическиелица
-        where наименование like '%${snp}%'`);
+        where наименование like isnull(@snp, наименование)`);
             res.send(result.recordset).status(200);
         }
         catch (error) {
