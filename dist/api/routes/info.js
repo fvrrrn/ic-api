@@ -12,9 +12,13 @@ exports.default = (app) => {
     route.get('/teachers', async (req, res) => {
         const { code1C = 'code1C', snp = 'snp' } = req.body;
         try {
-            const result = await mssql_1.default.pool1.request().query(`select top(1000) *
+            const result = await mssql_1.default.pool1
+                .request()
+                .input('code1C', mssql_1.default.types.Int, code1C)
+                .input('snp', mssql_1.default.types.NVarChar, `%${snp}%`)
+                .query(`select top(1000) *
             from ic_teachers
-            where code_1c = ${code1C} and snp = ${snp}`);
+            where code1C = isnull(@code1C, code1C) and snp like isnull(@snp, snp)`);
             res.send(result.recordset).status(200);
         }
         catch (error) {
@@ -23,51 +27,28 @@ exports.default = (app) => {
         }
     });
     route.get('/students', async (req, res) => {
-        const { code1C = 'Код_Студента', snp = 'Наименование' } = req.body;
+        const { code1C, snp } = req.body;
         try {
-            const result = await mssql_1.default.pool1.request().query(`select top(1000)
+            const result = await mssql_1.default.pool1
+                .request()
+                .input('code1C', mssql_1.default.types.Int, code1C)
+                .input('snp', mssql_1.default.types.NVarChar, `%${snp}%`)
+                .query(`select top(1000)
         Код_Студента code_1c,
-        Наименование snp,
         Фамилия surname,
         Имя name,
         Отчество patronymic,
-        Статус status,
         Код_Группы group_number,
-        УчебныйГод study_year,
+        УчебныйГод study_years,
         Год_Поступления enrolled_year,
         Пол gender,
-        Основания,
+        Основания admission_type,
         Изучаемый_Язык additional_language,
-        Долг,
         Дата_Рождения birth_date,
-        Пособие,
-        Общежитие dormatory,
-        ГодРождения birth_year,
         ФормаОбучения instruction_type,
-        НаучнаяСпециальность,
-        ДатаЗачисления,
-        НомерПриказаОЗачислении,
-        ДатаОкончания,
-        МестоРаботы,
-        ПрикрепКафедра,
-        НаучныйРуководитель,
-        ПродлениеСессии,
-        УчебныйПлан,
-        АкадемСправка,
-        ТемаДиплома,
-        Город_ПП,
-        Регион_ПП,
-        Страна_ПП,
-        Номер_Зачетной_Книжки,
-        E_Mail,
-        Улица_ПП,
-        Дом_Кв_ПП,
-        Мобильный,
-        Телефон_ПП,
-        Гражданство,
-        Номер_договора
+        Номер_Зачетной_Книжки record_book,
     from с_Студенты_new_1
-    where Код_Студента = ${code1C} and Наименование = ${snp}`);
+    where Код_Студента = isnull(@code1C, Код_Студента) and Наименование like isnull(@snp, Наименование)`);
             res.send(result.recordset).status(200);
         }
         catch (error) {

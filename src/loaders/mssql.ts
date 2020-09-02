@@ -1,4 +1,4 @@
-import { ConnectionPool } from 'mssql'
+import { ConnectionPool, NVarChar, Int } from 'mssql'
 import config from '../config'
 
 const pool1 = new ConnectionPool({
@@ -29,4 +29,8 @@ const pool2 = new ConnectionPool({
 export default {
   pool1,
   pool2,
+  types: {
+    NVarChar,
+    Int,
+  },
 }

@@ -31,5 +31,9 @@ const pool2 = new mssql_1.ConnectionPool({
 exports.default = {
     pool1,
     pool2,
+    types: {
+        NVarChar: mssql_1.NVarChar,
+        Int: mssql_1.Int,
+    },
 };
 //# sourceMappingURL=mssql.js.map
