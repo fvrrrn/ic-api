@@ -2,6 +2,7 @@
 .vscode/
 .eslintrc.js
 .prettierrc.js
+dist/
 
 # Logs
 logs
