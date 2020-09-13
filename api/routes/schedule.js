@@ -1,12 +1,13 @@
-import { Router, Request, Response } from 'express'
-import mssql from '../../loaders/mssql'
-import LoggerInstance from '../../loaders/logger'
+import express from 'express'
+const { Router } = express
+import mssql from '../../loaders/mssql.js'
+import LoggerInstance from '../../loaders/logger.js'
 const route = Router()
 
-export default (app: Router) => {
+export default (app) => {
   app.use('/schedule', route)
 
-  route.get('/teachers', async (req: Request, res: Response) => {
+  route.get('/teachers', async (req, res) => {
     const { snp } = req.body
     try {
       if (!snp) throw new Error('req.body.snp is undefined, no snp provided.')
@@ -93,7 +94,7 @@ export default (app: Router) => {
     }
   })
 
-  route.get('/students', async (req: Request, res: Response) => {
+  route.get('/students', async (req, res) => {
     const { group_number } = req.body
     try {
       if (!group_number)
