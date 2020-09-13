@@ -2,9 +2,9 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import helmet from 'helmet'
-import routes from '../api'
+import routes from '../api/index.js'
 
-export default ({ app }: { app: express.Application }) => {
+export default ({ app }) => {
   /**
    * Health Check endpoints
    * @TODO Explain why they are here

@@ -1,5 +1,6 @@
-import { ConnectionPool, NVarChar, Int } from 'mssql'
-import config from '../config'
+import mssql from 'mssql'
+const { ConnectionPool, NVarChar, Int } = mssql
+import config from '../config/index.js'
 
 const pool1 = new ConnectionPool({
   user: config.databaseUser,

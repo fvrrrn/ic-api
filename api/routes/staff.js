@@ -1,12 +1,13 @@
-import { Router, Request, Response } from 'express'
-import mssql from '../../loaders/mssql'
-import LoggerInstance from '../../loaders/logger'
+import express from 'express'
+const { Router } = express
+import mssql from '../../loaders/mssql.js'
+import LoggerInstance from '../../loaders/logger.js'
 const route = Router()
 
-export default (app: Router) => {
+export default (app) => {
   app.use('/staff', route)
 
-  route.get('/', async (req: Request, res: Response) => {
+  route.get('/', async (req, res) => {
     const { code1C = 'code1C', snp = 'snp' } = req.body
     try {
       const result = await mssql.pool2

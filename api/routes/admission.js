@@ -1,12 +1,13 @@
-import { Router, Request, Response } from 'express'
-import mssql from '../../loaders/mssql'
-import LoggerInstance from '../../loaders/logger'
+import express from 'express'
+const { Router } = express
+import mssql from '../../loaders/mssql.js'
+import LoggerInstance from '../../loaders/logger.js'
 const route = Router()
 
-export default (app: Router) => {
+export default (app) => {
   app.use('/admission', route)
 
-  route.get('/bachelors', async (req: Request, res: Response) => {
+  route.get('/bachelors', async (req, res) => {
     try {
       const request = mssql.pool1.request()
       const output1 = []
@@ -779,7 +780,7 @@ export default (app: Router) => {
     }
   })
 
-  route.get('/masters', async (req: Request, res: Response) => {
+  route.get('/masters', async (req, res) => {
     try {
       const result = await mssql.pool1
         .request()
@@ -1018,7 +1019,7 @@ export default (app: Router) => {
     }
   })
 
-  route.get('/concurrency_types', async (req: Request, res: Response) => {
+  route.get('/concurrency_types', async (req, res) => {
     try {
       const result = await mssql.pool1.request().query(`
   select *
@@ -1092,7 +1093,7 @@ export default (app: Router) => {
     }
   })
 
-  route.get('/spec_types', async (req: Request, res: Response) => {
+  route.get('/spec_types', async (req, res) => {
     try {
       const result = await mssql.pool1
         .request()
@@ -1106,7 +1107,7 @@ export default (app: Router) => {
     }
   })
 
-  route.get('/sponsorship_types', async (req: Request, res: Response) => {
+  route.get('/sponsorship_types', async (req, res) => {
     try {
       const result = await mssql.pool1
         .request()
@@ -1120,7 +1121,7 @@ export default (app: Router) => {
     }
   })
 
-  route.get('/admission_types', async (req: Request, res: Response) => {
+  route.get('/admission_types', async (req, res) => {
     try {
       const result = await mssql.pool1
         .request()

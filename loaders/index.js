@@ -1,5 +1,5 @@
 import expressLoader from './express'
-import mssqlLoader from './mssql'
+import mssqlLoader from './mssql.js'
 import Logger from './logger'
 
 export default async ({ expressApp }) => {

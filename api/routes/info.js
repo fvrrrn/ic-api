@@ -1,12 +1,13 @@
-import { Router, Request, Response } from 'express'
-import mssql from '../../loaders/mssql'
-import LoggerInstance from '../../loaders/logger'
+import express from 'express'
+const { Router } = express
+import mssql from '../../loaders/mssql.js'
+import LoggerInstance from '../../loaders/logger.js'
 const route = Router()
 
-export default (app: Router) => {
+export default (app) => {
   app.use('/info', route)
 
-  route.get('/teachers', async (req: Request, res: Response) => {
+  route.get('/teachers', async (req, res) => {
     const { code1C = 'code1C', snp = 'snp' } = req.body
     try {
       const result = await mssql.pool1
@@ -25,7 +26,7 @@ export default (app: Router) => {
     }
   })
 
-  route.get('/students', async (req: Request, res: Response) => {
+  route.get('/students', async (req, res) => {
     const { code1C, snp } = req.body
     try {
       const result = await mssql.pool1
@@ -57,7 +58,7 @@ export default (app: Router) => {
     }
   })
 
-  route.get('/groups_all', async (req: Request, res: Response) => {
+  route.get('/groups_all', async (req, res) => {
     try {
       const result = await mssql.pool1.request().query(
         `
@@ -113,7 +114,7 @@ SELECT distinct [Caf], [Group]
     }
   })
 
-  route.get('/groups', async (req: Request, res: Response) => {
+  route.get('/groups', async (req, res) => {
     const { group_number = 'Группа' } = req.body
     try {
       const result = await mssql.pool1.request().query(
@@ -149,7 +150,7 @@ SELECT distinct [Caf], [Group]
     }
   })
 
-  route.get('/snp_to_code/:snp', async (req: Request, res: Response) => {
+  route.get('/snp_to_code/:snp', async (req, res) => {
     const { snp = 'snp' } = req.params
     try {
       const result = await mssql.pool1.request().query(
