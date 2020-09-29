@@ -7,7 +7,232 @@ const route = Router()
 export default (app) => {
   app.use('/admission', route)
 
-  route.get('/bachelors', async (req, res) => {
+  /**
+   * @swagger
+   * /admission/applicants:
+   *  get:
+   *    operationId: admission/applicants
+   *    summary: Приемная кампания / Абитуриенты
+   *    parameters:
+   *    - in: query
+   *      name: degree_type_name
+   *      schema:
+   *        type: string
+   *        enum: [Бакалавр, Магистр, Аспирант]
+   *      default: Бакалавр
+   *      description: Название уровня подготовки.
+   *    - in: query
+   *      name: enroll_accepted
+   *      schema:
+   *        type: boolean
+   *      description: Согласен ли абитурент на зачисление.
+   *    produces:
+   *    - application/json
+   *    responses:
+   *      '200':
+   *        description: OK
+   *        content:
+   *          application/json:
+   *            schema:
+   *              type: object
+   *              properties:
+   *                code1C:
+   *                  type: number
+   *                  example: 100090393
+   *                  description: Код 1С абитуриента.
+   *                surname:
+   *                  type: string
+   *                  surname: Чернышов
+   *                  description: Фамилия.
+   *                name:
+   *                  type: string
+   *                  name: Борис
+   *                  description: Имя.
+   *                patronymic:
+   *                  type: string
+   *                  example: Борисович
+   *                  description: Отчество.
+   *                extra_score:
+   *                  type: string
+   *                  example: 5
+   *                  description: Код 1С абитуриента.
+   *                is_doc_original:
+   *                  type: string
+   *                  example: true
+   *                  description: Подан оригинал документа.
+   *                privileged:
+   *                  type: string
+   *                  example: false
+   *                  description: Имеет преимущественное.
+   *                dorm_required:
+   *                  type: string
+   *                  example: true
+   *                  description: Требуется ли общежитие.
+   *                date_applied:
+   *                  type: string
+   *                  example: '2020-07-13T14:23:57.000Z'
+   *                  description: Когда подано заявление.
+   *                exams:
+   *                  type: object
+   *                  propeties:
+   *                    ege:
+   *                      type: array
+   *                      items:
+   *                        type: object
+   *                        properties:
+   *                          id:
+   *                            type: string
+   *                            example: 000000002
+   *                            description: Код 1С предмета ЕГЭ.
+   *                          name:
+   *                            type: string
+   *                            example: Математика
+   *                            description: .
+   *                          score:
+   *                            type: string
+   *                    vi:
+   *                      type: array
+   *                      items:
+   *                        type: object
+   *                        properties:
+   *                          id:
+   *                            type: string
+   *                          name:
+   *                            type: string
+   *                          score:
+   *                            type: string
+   *                specs:
+   *                  type: array
+   *                  items:
+   *                    type: object
+   *                    properties:
+   *                       id:
+   *                         type: string
+   *                         name:
+   *                           type: string
+   *                         enroll_accepted:
+   *                           type: string
+   *                         concurrency_type:
+   *                           type: object
+   *                           properties:
+   *                             id:
+   *                               type: string
+   *                             name:
+   *                               type: string
+   *                         sponsorship_type:
+   *                           type: object
+   *                           properties:
+   *                             id:
+   *                               type: string
+   *                             name:
+   *                               type: string
+   *                         admission_type:
+   *                           type: object
+   *                           properties:
+   *                             id:
+   *                               type: string
+   *                             name:
+   *                               type: string
+   *                         degree_type:
+   *                           type: object
+   *                           properties:
+   *                             id:
+   *                               type: string
+   *                             name:
+   *                               type: string
+   *                         status:
+   *                           type: object
+   *                           properties:
+   *                             id:
+   *                               type: number
+   *                             name:
+   *                               type: string
+   *                update_time:
+   *                  type: string
+   *            example:
+   *                code1C: '100090393'
+   *                surname: Гадирова
+   *                name: Гюнай
+   *                patronymic: Фаризовна
+   *                extra_score: 5
+   *                is_doc_original: false
+   *                privileged: false
+   *                dorm_required: false
+   *                date_applied: '2020-07-13T14:23:57.000Z'
+   *                exams:
+   *                  ege:
+   *                    - id: '000000014'
+   *                      name: Информатика и ИКТ
+   *                      score: 44
+   *                  vi:
+   *                    - id: '000000002'
+   *                      name: Математика
+   *                      score: 79
+   *                    - id: '000000001'
+   *                      name: Русский язык
+   *                      score: 67
+   *                    - id: '000000014'
+   *                      name: Информатика и ИКТ
+   *                      score: 46
+   *                specs:
+   *                  - id: '230'
+   *                    name: Прикладная информатика
+   *                    enroll_accepted: false
+   *                    concurrency_type:
+   *                      id: '000001144'
+   *                      name: Прикладная информатика
+   *                    sponsorship_type:
+   *                      id: '000000003'
+   *                      name: Бюджетная основа
+   *                    admission_type:
+   *                      id: '000000003'
+   *                      name: На общих основаниях
+   *                    degree_type:
+   *                      id: '000000001'
+   *                      name: Бакалавр
+   *                    status:
+   *                      id: 0
+   *                      name: Подано
+   *                  - id: '195'
+   *                    name: Информатика и вычислительная техника
+   *                    enroll_accepted: false
+   *                    concurrency_type:
+   *                      id: '000001136'
+   *                      name: Информатика и вычислительная техника
+   *                    sponsorship_type:
+   *                      id: '000000003'
+   *                      name: Бюджетная основа
+   *                    admission_type:
+   *                      id: '000000003'
+   *                      name: На общих основаниях
+   *                    degree_type:
+   *                      id: '000000001'
+   *                      name: Бакалавр
+   *                    status:
+   *                      id: 0
+   *                      name: Подано
+   *                  - id: '231'
+   *                    name: Фундаментальная информатика и информационные технологии
+   *                    enroll_accepted: false
+   *                    concurrency_type:
+   *                      id: '000001132'
+   *                      name: Фундаментальная информатика и информационные технологии
+   *                    sponsorship_type:
+   *                      id: '000000003'
+   *                      name: Бюджетная основа
+   *                    admission_type:
+   *                      id: '000000003'
+   *                      name: На общих основаниях
+   *                    degree_type:
+   *                      id: '000000001'
+   *                      name: Бакалавр
+   *                    status:
+   *                      id: 0
+   *                      name: Подано
+   *                update_time: '10:44:15'
+   */
+
+  route.get('/applicants', async (req, res) => {
     try {
       const request = mssql.pool1.request()
       const output1 = []

@@ -1,0 +1,102 @@
+
+/admission/applicants/{degree_type_name}&{enroll_accepted}:
+ get:
+   operationId: admission/applicants
+   summary: Приемная кампания / Абитуриенты
+   requestBody:
+     content:
+       applicantion/json:
+         schema:
+           type: object
+           properties:
+             code1C:
+               type: number 
+             surname: 
+               type: string
+             name:
+               type: string
+             patronymic: 
+               type: string
+             extra_score: 
+               type: string
+             is_doc_original:
+               type: string
+             privileged: 
+               type: string
+             dorm_required: 
+               type: string
+             date_applied:
+               type: string
+             exams:
+               type: object
+               propeties: 
+                 ege:
+                   type: array
+                   items:
+                     type: object
+                     properties: object
+                       id:
+                         type: string
+                       name:
+                         type: string
+                       score:
+                         type: string
+                 vi:
+                   type: array
+                   items:
+                     type: object
+                     properties: object
+                       id:
+                         type: string
+                       name:
+                         type: string
+                       score:
+                         type: string
+             specs:
+               type: array
+               items:
+                 type: object
+                 properties:
+                    id:                                                
+                      type: string                                                
+                      name: 
+                        type: string                                                
+                      enroll_accepted: 
+                        type: string                                                
+                      concurrency_type:
+                        type: object
+                        properties:
+                          id: 
+                            type: string
+                          name: 
+                            type: string
+                      sponsorship_type:
+                        type: object
+                        properties:
+                          id: 
+                            type: string
+                          name: 
+                            type: string
+                      admission_type:
+                        type: object
+                        properties:
+                          id: 
+                            type: string
+                          name: 
+                            type: string
+                      degree_type:
+                        type: object
+                        properties:
+                          id: 
+                            type: string
+                          name: 
+                            type: string
+                      status:
+                        type: object
+                        properties:
+                          id: 
+                            type: number
+                          name: 
+                            type: string
+             update_time: 
+               type: string
