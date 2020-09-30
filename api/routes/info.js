@@ -113,15 +113,7 @@ SELECT distinct [Caf], [Group]
       res.sendStatus(500)
     }
   })
-  /**
-   * @swagger
-   * /customers:
-   *  get:
-   *    description: Use to request all customers
-   *    responses:
-   *      '200':
-   *        description: A successful response
-   */
+
   route.get('/groups', async (req, res) => {
     const { group_number = 'Группа' } = req.body
     try {
@@ -158,26 +150,6 @@ SELECT distinct [Caf], [Group]
     }
   })
 
-  /**
-   * @swagger
-   *  components:
-   *    schemas:
-   *      User:
-   *        type: object
-   *        required:
-   *          - name
-   *          - email
-   *        properties:
-   *          name:
-   *            type: string
-   *          email:
-   *            type: string
-   *            format: email
-   *            description: Email for the user, needs to be unique.
-   *        example:
-   *           name: Alexander
-   *           email: fake@email.com
-   */
   route.get('/snp_to_code/:snp', async (req, res) => {
     const { snp = 'snp' } = req.params
     try {
