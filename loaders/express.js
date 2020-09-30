@@ -16,6 +16,9 @@ export default ({ app }) => {
     res.status(200).end()
   })
 
+  // Since we don't really need any icons
+  app.get('/favicon.ico', (req, res) => res.status(204).end())
+
   // Useful if you're behind a reverse proxy (Heroku, Bluemix, AWS ELB, Nginx, etc)
   // It shows the real origin IP in the heroku or Cloudwatch logs
   app.enable('trust proxy')
